@@ -89,7 +89,7 @@ try {
     ),
   );
   assert.deepEqual(firefox.allowed_extensions, [
-    "authenticator-2fa@macseek.cc",
+    "authenticator-for-2fa@macseek.cc",
   ]);
   await assert.rejects(install({ root, ids: ["*"], app }));
   console.log(

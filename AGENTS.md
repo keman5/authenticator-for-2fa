@@ -7,7 +7,7 @@ Guidance for code agents working on Authenticator - 2FA.
 - This is a browser extension built with React 19, TypeScript, Vite, Tailwind CSS, and daisyUI.
 - Product name: `Authenticator - 2FA`.
 - Extension `short_name`: must stay within the package limit of 12 characters per locale.
-- Homepage metadata: `https://github.com/keman5/authenticator-2fa`.
+- Homepage metadata: `https://github.com/keman5/authenticator-for-2fa`.
 
 ## Development Rules
 

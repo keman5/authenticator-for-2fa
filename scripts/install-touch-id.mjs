@@ -44,7 +44,7 @@ export async function install({ root = homedir(), ids = [], app } = {}) {
     ["Microsoft Edge/NativeMessagingHosts", { allowed_origins: origins }],
     [
       "Mozilla/NativeMessagingHosts",
-      { allowed_extensions: ["authenticator-2fa@macseek.cc"] },
+      { allowed_extensions: ["authenticator-for-2fa@macseek.cc"] },
     ],
   ]) {
     const folder = join(base, directory);

@@ -270,7 +270,7 @@ export function SettingsView({
         </div>
         <a
           className="list-row"
-          href="https://github.com/keman5/authenticator-2fa"
+          href="https://github.com/keman5/authenticator-for-2fa"
           target="_blank"
           rel="noreferrer"
         >
