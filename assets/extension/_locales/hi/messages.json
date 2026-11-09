@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "प्रमाणक - 2FA"
+  },
+  "extensionShortName": {
+    "message": "प्रमाणक"
+  },
+  "extensionDescription": {
+    "message": "सुरक्षित साइन-इन के लिए एन्क्रिप्टेड 2FA कोड।"
+  },
+  "actionTitle": {
+    "message": "प्रमाणक - 2FA खोलें"
+  },
+  "commandOpenPopup": {
+    "message": "पॉपअप खोलें"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "एक बार के कोड, वैकल्पिक स्क्रीन लॉक और एन्क्रिप्टेड बैकअप।"
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "लॉक के साथ खोलें"
+  }
+}

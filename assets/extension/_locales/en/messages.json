@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "Authenticator - 2FA"
+  },
+  "extensionShortName": {
+    "message": "2FA Auth"
+  },
+  "extensionDescription": {
+    "message": "Encrypted 2FA codes for secure sign-ins."
+  },
+  "actionTitle": {
+    "message": "Open Authenticator - 2FA"
+  },
+  "commandOpenPopup": {
+    "message": "Open popup"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "One-time codes, optional screen lock and encrypted portable backups."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "Open with screen lock"
+  }
+}

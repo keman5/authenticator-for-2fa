@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "Authenticator - 2FA"
+  },
+  "extensionShortName": {
+    "message": "2FA Auth"
+  },
+  "extensionDescription": {
+    "message": "Güvenli girişler için şifreli 2FA kodları."
+  },
+  "actionTitle": {
+    "message": "Authenticator - 2FA'yı aç"
+  },
+  "commandOpenPopup": {
+    "message": "Açılır pencereyi aç"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "Tek kullanımlık kodlar, isteğe bağlı ekran kilidi ve şifreli yedekler."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "Kilitle aç"
+  }
+}

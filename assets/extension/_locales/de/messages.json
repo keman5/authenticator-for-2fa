@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "Authentifikator - 2FA"
+  },
+  "extensionShortName": {
+    "message": "2FA Auth"
+  },
+  "extensionDescription": {
+    "message": "Verschlüsselte 2FA-Codes für sichere Anmeldungen."
+  },
+  "actionTitle": {
+    "message": "Authentifikator - 2FA öffnen"
+  },
+  "commandOpenPopup": {
+    "message": "Popup öffnen"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "Einmalcodes, optionale Bildschirmsperre und verschlüsselte Backups."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "Mit Sperre öffnen"
+  }
+}

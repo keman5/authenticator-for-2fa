@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "인증기 - 2FA"
+  },
+  "extensionShortName": {
+    "message": "2FA 인증기"
+  },
+  "extensionDescription": {
+    "message": "안전한 로그인을 위한 암호화된 2단계 인증 코드."
+  },
+  "actionTitle": {
+    "message": "인증기 - 2FA 열기"
+  },
+  "commandOpenPopup": {
+    "message": "팝업 열기"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "일회용 코드, 선택적 화면 잠금 및 암호화된 백업."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "화면 잠금으로 열기"
+  }
+}

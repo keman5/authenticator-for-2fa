@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "المصادِق - 2FA"
+  },
+  "extensionShortName": {
+    "message": "المصادِق"
+  },
+  "extensionDescription": {
+    "message": "رموز 2FA مشفرة لتسجيل الدخول الآمن."
+  },
+  "actionTitle": {
+    "message": "فتح المصادِق - 2FA"
+  },
+  "commandOpenPopup": {
+    "message": "فتح النافذة المنبثقة"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "رموز مؤقتة وقفل شاشة اختياري ونسخ احتياطية مشفرة."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "فتح مع القفل"
+  }
+}

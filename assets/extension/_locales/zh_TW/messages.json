@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "驗證器 - 2FA"
+  },
+  "extensionShortName": {
+    "message": "2FA 驗證器"
+  },
+  "extensionDescription": {
+    "message": "用於安全登入的加密雙重驗證碼。"
+  },
+  "actionTitle": {
+    "message": "開啟驗證器 - 2FA"
+  },
+  "commandOpenPopup": {
+    "message": "開啟彈出視窗"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "動態驗證碼、可選介面鎖與加密備份。"
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "透過介面鎖開啟"
+  }
+}

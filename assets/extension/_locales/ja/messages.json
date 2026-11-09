@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "認証アプリ - 2FA"
+  },
+  "extensionShortName": {
+    "message": "認証アプリ"
+  },
+  "extensionDescription": {
+    "message": "安全なサインインのための暗号化された2FAコード。"
+  },
+  "actionTitle": {
+    "message": "認証アプリ - 2FAを開く"
+  },
+  "commandOpenPopup": {
+    "message": "ポップアップを開く"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "ワンタイムコード、任意の画面ロック、暗号化バックアップ。"
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "画面ロックで開く"
+  }
+}

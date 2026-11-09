@@ -1,0 +1,32 @@
+{
+  "extensionName": {
+    "message": "Autenticador - 2FA"
+  },
+  "extensionShortName": {
+    "message": "Autenticador"
+  },
+  "extensionDescription": {
+    "message": "Códigos 2FA criptografados para entradas seguras."
+  },
+  "actionTitle": {
+    "message": "Abrir Autenticador - 2FA"
+  },
+  "commandOpenPopup": {
+    "message": "Abrir popup"
+  },
+  "name": {
+    "message": "Authenticator - 2FA"
+  },
+  "shortName": {
+    "message": "2FA Codes"
+  },
+  "description": {
+    "message": "Códigos temporários, bloqueio opcional e backups criptografados."
+  },
+  "title": {
+    "message": "Authenticator - 2FA"
+  },
+  "normal": {
+    "message": "Abrir com bloqueio"
+  }
+}
