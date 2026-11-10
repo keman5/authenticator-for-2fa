@@ -18,7 +18,10 @@ import sharp from "sharp";
 const output = "artifacts/store";
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
-const { version } = JSON.parse(await readFile("package.json", "utf8"));
+const { version: packageVersion, extensionVersion } = JSON.parse(
+  await readFile("package.json", "utf8"),
+);
+const version = extensionVersion ?? packageVersion;
 const manifest = JSON.parse(await readFile("dist/edge/manifest.json", "utf8"));
 if (manifest.version !== version)
   throw new Error("Build the current version first.");
@@ -380,7 +383,7 @@ try {
                   "Published policy/support URLs",
                   "Publisher account verification",
                   "Listing fields for all enabled locales",
-              "Edge browser-restart smoke verification",
+                  "Edge browser-restart smoke verification",
                 ],
         },
         null,

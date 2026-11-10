@@ -4,7 +4,21 @@ cd "$(dirname "$0")"
 if command -v go >/dev/null 2>&1; then go clean -cache; fi
 rm -rf .artifacts
 trap 'rm -rf .artifacts' EXIT
-node -e 'const fs = require("fs"); const file = "package.json"; const data = JSON.parse(fs.readFileSync(file, "utf8")); const explicit = process.env.BUILD_VERSION; const parts = (explicit ?? data.version).split("."); if (parts.length !== 3 || parts.some(part => !/^(0|[1-9]\d*)$/.test(part) || !Number.isSafeInteger(Number(part)))) throw new Error("Expected a numeric major.minor.patch version"); if (explicit === undefined) parts[2] = String(Number(parts[2]) + 1); data.version = parts.join("."); fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n");'
+node --input-type=commonjs <<'NODE'
+const fs = require("node:fs");
+const file = "package.json";
+const data = JSON.parse(fs.readFileSync(file, "utf8"));
+const explicit = process.env.BUILD_VERSION;
+const parts = (explicit ?? data.version).split(".");
+if (!(explicit === undefined ? parts.length === 3 : [2, 3].includes(parts.length)) ||
+    parts.some(part => !/^(0|[1-9]\d*)$/.test(part) || !Number.isSafeInteger(Number(part))))
+  throw new Error("Expected major.minor or major.minor.patch release version");
+if (parts.length === 2) parts.push("0");
+if (explicit === undefined) parts[2] = String(Number(parts[2]) + 1);
+data.version = parts.join(".");
+data.extensionVersion = explicit ?? data.version;
+fs.writeFileSync(file, JSON.stringify(data, null, 2) + "\n");
+NODE
 pnpm exec vite build
 node scripts/build-extension.mjs
 node scripts/verify-build.mjs

@@ -123,8 +123,15 @@ test("page menus expose matched labels without secrets and issue a code only for
   const accounts = await accountWorkspace();
   const response = await request({ type: "input-menu:accounts" }, content);
   expect(response.accounts).toEqual([
-    { id: accounts[0]!.id, issuer: "Instagram", label: "alice" },
+    {
+      id: accounts[0]!.id,
+      issuer: "Instagram",
+      label: "alice",
+      digits: 6,
+      period: 30,
+    },
   ]);
+  expect(response.countdown).toEqual({ period: 30, offsetMs: 0 });
   expect(JSON.stringify(response)).not.toContain("JBSWY");
   expect(
     (
@@ -146,6 +153,26 @@ test("page menus expose matched labels without secrets and issue a code only for
     (await request({ type: "input-menu:accounts" }, { ...content, frameId: 1 }))
       .ok,
   ).toBe(false);
+});
+test("page-menu countdown follows corrected time and skips counter-based accounts", async () => {
+  const accounts = await accountWorkspace();
+  const { TIME_CALIBRATION_KEY } = await import("../../src/platform/time");
+  await new Promise<void>((resolve) =>
+    chrome.storage.local.set(
+      { [TIME_CALIBRATION_KEY]: { offsetMs: 4500, calibratedAt: Date.now() } },
+      resolve,
+    ),
+  );
+  expect(
+    (await request({ type: "input-menu:accounts" }, content)).countdown,
+  ).toEqual({ period: 30, offsetMs: 4500 });
+  const { transaction } = await import("../../src/platform/repository");
+  await transaction((space) => {
+    space.records[accounts[0]!.id]!.mode = "hotp";
+  });
+  expect(
+    (await request({ type: "input-menu:accounts" }, content)).countdown,
+  ).toBeUndefined();
 });
 test("permission revocation or disabling prevents page menu access", async () => {
   await accountWorkspace();

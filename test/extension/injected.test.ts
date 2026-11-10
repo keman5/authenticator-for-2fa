@@ -15,10 +15,22 @@ let listeners: ((
 let root: ShadowRoot;
 let documentListeners: MockInstance<typeof document.addEventListener>;
 let windowListeners: MockInstance<typeof window.addEventListener>;
+let observers: MutationObserver[];
 beforeEach(async () => {
   vi.resetModules();
   document.body.innerHTML = "";
   listeners = [];
+  observers = [];
+  // Preserve the receiver when calling the native method below.
+  // oxlint-disable-next-line typescript/unbound-method
+  const observe = MutationObserver.prototype.observe;
+  vi.spyOn(MutationObserver.prototype, "observe").mockImplementation(function (
+    this: MutationObserver,
+    ...args
+  ) {
+    observers.push(this);
+    observe.apply(this, args);
+  });
   vi.stubGlobal("__authenticator2FAInstalled", false);
   documentListeners = vi.spyOn(document, "addEventListener");
   windowListeners = vi.spyOn(window, "addEventListener");
@@ -58,12 +70,16 @@ beforeEach(async () => {
   await import("../../src/injected");
 });
 afterEach(() => {
+  for (const listener of listeners)
+    listener({ kind: "input-menu:refresh" }, {}, () => {});
+  for (const observer of observers) observer.disconnect();
   for (const [type, listener, options] of documentListeners.mock.calls)
     document.removeEventListener(type, listener, options);
   for (const [type, listener, options] of windowListeners.mock.calls)
     window.removeEventListener(type, listener, options);
   document.querySelector("[data-authenticator-menu]")?.remove();
   vi.restoreAllMocks();
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 function fill(code = "123456") {
@@ -84,12 +100,101 @@ function offerAccount(code = "123456") {
         ? {
             ok: true,
             accounts: [{ id: "one", issuer: "Example", label: "alice" }],
+            countdown: { period: 30, offsetMs: 0 },
           }
         : { ok: true, code },
     );
     return Promise.resolve();
   }) as typeof chrome.runtime.sendMessage);
 }
+test("the page entry uses the countdown logo, warns before expiry and resets with the next code", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-10T00:00:10Z"));
+  offerAccount();
+  document.body.innerHTML = '<input autocomplete="one-time-code">';
+  const input = document.querySelector("input")!;
+  input.focus();
+  const trigger = root.querySelector<HTMLButtonElement>(
+    "[data-authenticator-trigger]",
+  )!;
+  const arcs = Array.from(trigger.querySelectorAll("circle[stroke-dasharray]"));
+  expect(arcs).toHaveLength(4);
+  expect(trigger.textContent).not.toContain("2FA");
+  const partial = arcs[2]!.getAttribute("stroke-dasharray");
+  vi.advanceTimersByTime(1000);
+  expect(arcs[2]!.getAttribute("stroke-dasharray")).not.toBe(partial);
+  vi.advanceTimersByTime(15000);
+  expect(arcs.map((arc) => arc.getAttribute("stroke"))).toEqual(
+    Array(4).fill("#EA4335"),
+  );
+  vi.advanceTimersByTime(4000);
+  expect(arcs.map((arc) => arc.getAttribute("stroke"))).toEqual([
+    "#EA4335",
+    "#FBBC05",
+    "#4285F4",
+    "#34A853",
+  ]);
+  expect(document.activeElement).toBe(input);
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+  expect(document.querySelector("[data-authenticator-menu]")).toBeNull();
+  expect(vi.getTimerCount()).toBe(0);
+});
+test.each([
+  '<label for="code">Authentication code</label><input id="code" inputmode="numeric" maxlength="6">',
+  '<span id="code-label">验证码</span><input name="code" aria-labelledby="code-label" maxlength="6">',
+  '<form><h2>Two-factor authentication</h2><label>Code<input name="code" inputmode="numeric" maxlength="6"></label></form>',
+  '<dialog open><h2>Two-factor authentication</h2><label>Code<input name="code" inputmode="numeric" maxlength="6"></label></dialog>',
+])(
+  "recognizes a two-factor settings field from its accessible label or form: %s",
+  (html) => {
+    offerAccount();
+    document.body.innerHTML = html;
+    const input = document.querySelector("input")!;
+    input.focus();
+    expect(document.querySelector("[data-authenticator-menu]")).not.toBeNull();
+    expect(root.querySelector("[data-authenticator-trigger]")).not.toBeNull();
+    input.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+    expect(document.querySelector("[data-authenticator-menu]")).not.toBeNull();
+    root
+      .querySelector<HTMLButtonElement>("[data-authenticator-account]")!
+      .click();
+    expect(input.value).toBe("123456");
+  },
+);
+test("shows an upper-right entry for a dynamically inserted two-factor dialog without stealing focus", async () => {
+  offerAccount();
+  document.body.innerHTML = '<button id="settings">Settings</button>';
+  document.querySelector<HTMLButtonElement>("#settings")!.focus();
+  const active = document.activeElement;
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    '<div role="dialog"><label for="code">Verification code</label><input id="code" inputmode="numeric" maxlength="6"></div>',
+  );
+  await vi.waitFor(() =>
+    expect(document.querySelector("[data-authenticator-menu]")).not.toBeNull(),
+  );
+  expect(document.activeElement).toBe(active);
+  const trigger = root.querySelector<HTMLButtonElement>(
+    "[data-authenticator-trigger]",
+  )!;
+  expect(trigger.style.top).toBe("0px");
+  expect(root.querySelector<HTMLElement>('[role="group"]')!.hidden).toBe(true);
+  trigger.click();
+  expect(root.querySelector<HTMLElement>('[role="group"]')!.hidden).toBe(false);
+  root
+    .querySelector<HTMLButtonElement>("[data-authenticator-account]")!
+    .click();
+  expect(document.querySelector("input")!.value).toBe("123456");
+});
+test("an authenticator form heading cannot turn a recovery-code field into an OTP target", () => {
+  offerAccount();
+  document.body.innerHTML =
+    '<form><h2>Two-factor authentication</h2><label>Recovery code<input name="code" inputmode="numeric" maxlength="6"></label></form>';
+  document.querySelector("input")!.focus();
+  expect(fill()).toBe(false);
+  expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+});
 test.each(["word", "12345", "abc123"])(
   "preserves existing non-code content %s without dispatching edits",
   (value) => {
@@ -251,7 +356,7 @@ test("fills a complete split OTP form and refuses malformed codes", () => {
   ).toBe("123456");
   expect(fill("secret")).toBe(false);
 });
-test("the page menu displays labels and fetches the code only after an explicit selection", () => {
+test("the page menu displays masked labels and fills only after an explicit selection", () => {
   document.body.innerHTML = "<input name=otp><input name=username>";
   vi.mocked(chrome.runtime.sendMessage).mockImplementation(((
     request: Record<string, unknown>,
@@ -269,7 +374,8 @@ test("the page menu displays labels and fetches the code only after an explicit 
   }) as typeof chrome.runtime.sendMessage);
   const input = document.querySelector("input")!;
   input.focus();
-  expect(root.textContent).toContain("Example alice");
+  expect(root.querySelector(".label")?.textContent).toBe("alice");
+  expect(root.textContent).not.toContain("Example");
   expect(root.textContent).not.toContain("123456");
   expect(input.value).toBe("");
   expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
@@ -278,6 +384,86 @@ test("the page menu displays labels and fetches the code only after an explicit 
   root.querySelector("button")!.click();
   expect(input.value).toBe("123456");
   expect(document.querySelector("[data-authenticator-menu]")).toBeNull();
+});
+
+test("the external top-right trigger opens on hover without focus or filling", () => {
+  offerAccount();
+  document.body.innerHTML = '<input autocomplete="one-time-code">';
+  const input = document.querySelector("input")!;
+  input.focus();
+  const trigger = root.querySelector<HTMLButtonElement>(
+    "[data-authenticator-trigger]",
+  )!;
+  const list = root.querySelector<HTMLElement>('[role="group"]')!;
+  expect(parseFloat(trigger.style.left)).toBeGreaterThanOrEqual(200);
+  expect(parseFloat(trigger.style.top)).toBeLessThanOrEqual(10);
+  expect(list.hidden).toBe(true);
+  trigger.dispatchEvent(new Event("pointerenter"));
+  expect(list.hidden).toBe(false);
+  expect(root.querySelector("[data-authenticator-code]")?.textContent).toBe(
+    "******",
+  );
+  expect(document.activeElement).toBe(input);
+  expect(input.value).toBe("");
+  expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
+});
+
+test("hover reveals only its row, ignores late replies, masks on leave and refreshes at rollover", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-10T00:00:24Z"));
+  const replies: ((value: unknown) => void)[] = [];
+  vi.mocked(chrome.runtime.sendMessage).mockImplementation(((
+    request: Record<string, unknown>,
+    reply: (value: unknown) => void,
+  ) => {
+    if (request.type === "input-menu:accounts")
+      reply({
+        ok: true,
+        accounts: [
+          {
+            id: "one",
+            issuer: "Example",
+            label: "alice",
+            digits: 6,
+            period: 30,
+          },
+          { id: "two", issuer: "Example", label: "bob", digits: 8, period: 60 },
+        ],
+        countdown: { period: 30, offsetMs: 0 },
+      });
+    else replies.push(reply);
+    return Promise.resolve();
+  }) as typeof chrome.runtime.sendMessage);
+  document.body.innerHTML = '<input autocomplete="one-time-code">';
+  document.querySelector("input")!.focus();
+  root
+    .querySelector("[data-authenticator-trigger]")!
+    .dispatchEvent(new Event("pointerenter"));
+  const [one, two] = [
+    ...root.querySelectorAll<HTMLButtonElement>("[data-authenticator-account]"),
+  ];
+  const code = (row: HTMLButtonElement) =>
+    row.querySelector<HTMLElement>("[data-authenticator-code]")!;
+  expect(code(one!).textContent).toBe("******");
+  expect(code(two!).textContent).toBe("********");
+  one!.dispatchEvent(new Event("pointerenter"));
+  one!.dispatchEvent(new Event("pointerleave"));
+  replies.shift()!({ ok: true, code: "123456" });
+  expect(code(one!).textContent).toBe("******");
+  one!.dispatchEvent(new Event("pointerenter"));
+  replies.shift()!({ ok: true, code: "123456" });
+  expect(code(one!).textContent).toBe("123456");
+  vi.advanceTimersByTime(1000);
+  expect(code(one!).style.color).toBe("rgb(234, 67, 53)");
+  expect(code(two!).style.color).toBe("rgb(66, 133, 244)");
+  vi.advanceTimersByTime(5000);
+  expect(code(one!).textContent).toBe("******");
+  replies.shift()!({ ok: true, code: "654321" });
+  expect(code(one!).textContent).toBe("654321");
+  expect(code(one!).style.color).toBe("rgb(66, 133, 244)");
+  one!.dispatchEvent(new Event("pointerleave"));
+  expect(code(one!).textContent).toBe("******");
+  expect(document.querySelector("input")!.value).toBe("");
 });
 test("late menu selection cannot fill after focus changes or after the menu is reset", () => {
   document.body.innerHTML = "<input name=otp><input name=username>";

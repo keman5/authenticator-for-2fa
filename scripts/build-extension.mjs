@@ -39,7 +39,10 @@ notices +=
   (await readFile("docs/licenses/Apache-2.0.txt", "utf8")) +
   "\n\nzint:\n" +
   (await readFile("docs/licenses/zint.txt", "utf8"));
-const { version } = JSON.parse(await readFile("package.json", "utf8"));
+const { version: packageVersion, extensionVersion } = JSON.parse(
+  await readFile("package.json", "utf8"),
+);
+const version = extensionVersion ?? packageVersion;
 // The SVG uses the icon24 reference's 3px ring at 24px (6 / 48 viewBox units).
 const icon = await readFile("assets/brand/icons/authenticator-2fa-icon.svg");
 for (const size of [16, 32, 48, 128])
@@ -184,6 +187,4 @@ for (const target of ["chrome", "edge", "firefox", "safari"]) {
     JSON.stringify(manifest, null, 2) + "\n",
   );
 }
-console.log(
-  "Built Chrome, Edge, Firefox and Safari extension resources.",
-);
+console.log("Built Chrome, Edge, Firefox and Safari extension resources.");

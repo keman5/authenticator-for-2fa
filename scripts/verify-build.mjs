@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile, readdir, access } from "node:fs/promises";
 const read = async (path) => JSON.parse(await readFile(path, "utf8"));
+const metadata = await read("package.json");
 for (const target of ["chrome", "edge", "firefox", "safari"]) {
   const root = `dist/${target}`;
   const manifest = await read(`${root}/manifest.json`);
+  assert.equal(manifest.version, metadata.extensionVersion ?? metadata.version);
   assert.equal(manifest.manifest_version, 3);
   assert.deepEqual(Object.keys(manifest.commands), ["_execute_action"]);
   assert.equal(manifest.default_locale, "en");

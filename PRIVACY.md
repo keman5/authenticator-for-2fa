@@ -22,6 +22,8 @@ When you use site matching or page filling, the extension reads the active page'
 
 Copy actions place codes or a sync recovery key on the system clipboard. Other software and clipboard-history services may access copied content under their own permissions and policies.
 
+The optional webpage menu shows site-matched accounts with masked codes. Hovering or keyboard-focusing an account requests its current code from the extension for a temporary preview in the injected extension UI. Leaving the row masks the preview. Previewing does not fill the webpage's input; selecting the account explicitly fills it. OTP secrets remain in extension storage.
+
 ## Optional encrypted browser sync
 
 If you enable account sync, the extension encrypts account records with a separate recovery key before writing them to the browser vendor's sync service through `storage.sync`. Encrypted records, record identifiers, a group identifier and deletion metadata are handled by that service and your other connected installations. The recovery key remains in local extension storage and is shared with another installation only when you transfer it yourself. The screen password, passkey enrollment and local preferences are not included in this account-sync payload.

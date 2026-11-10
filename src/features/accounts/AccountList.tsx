@@ -332,43 +332,45 @@ export function AccountList({
                     </span>
                   </div>
                 </button>
-                {account.type === 'hotp' && (
-                  <button
-                    className="menu-btn"
-                    type="button"
-                    aria-label={tr('next')}
-                    onClick={() => run(() => vault.advanceHotp(account))}
-                  >
-                    <RefreshCw size={14} />
-                  </button>
-                )}
-                <button
-                  className="fill-btn"
-                  type="button"
-                  onClick={() => code && onCopy(code.value, true)}
-                >
-                  {ui('fill')}
-                </button>
-                <div className="flex shrink-0 flex-col items-center gap-1">
-                  <button
-                    className="menu-btn"
-                    type="button"
-                    aria-label={`${tr('settings')}: ${account.issuer} ${account.label}`}
-                    aria-expanded={menu === account.id}
-                    onClick={(event) => {
-                      const box = event.currentTarget.getBoundingClientRect();
-                      setMenuPosition({
-                        top: Math.max(
-                          6,
-                          Math.min(box.bottom + 5, window.innerHeight - 160)
-                        ),
-                        left: Math.max(6, box.right - 170)
-                      });
-                      setMenu(menu === account.id ? null : account.id);
-                    }}
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <div className="flex items-center gap-1">
+                    {account.type === 'hotp' && (
+                      <button
+                        className="menu-btn"
+                        type="button"
+                        aria-label={tr('next')}
+                        onClick={() => run(() => vault.advanceHotp(account))}
+                      >
+                        <RefreshCw size={14} />
+                      </button>
+                    )}
+                    <button
+                      className="fill-btn"
+                      type="button"
+                      onClick={() => code && onCopy(code.value, true)}
+                    >
+                      {ui('fill')}
+                    </button>
+                    <button
+                      className="menu-btn"
+                      type="button"
+                      aria-label={`${tr('settings')}: ${account.issuer} ${account.label}`}
+                      aria-expanded={menu === account.id}
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect();
+                        setMenuPosition({
+                          top: Math.max(
+                            6,
+                            Math.min(box.bottom + 5, window.innerHeight - 160)
+                          ),
+                          left: Math.max(6, box.right - 170)
+                        });
+                        setMenu(menu === account.id ? null : account.id);
+                      }}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                  </div>
                   {vault.settings.showCountdownSeconds &&
                     account.type !== 'hotp' && (
                       <span

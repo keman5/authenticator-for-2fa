@@ -10,7 +10,10 @@ import { zipSync } from "fflate";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { cp } from "node:fs/promises";
-const { version } = JSON.parse(await readFile("package.json", "utf8"));
+const { version: packageVersion, extensionVersion } = JSON.parse(
+  await readFile("package.json", "utf8"),
+);
+const version = extensionVersion ?? packageVersion;
 await mkdir("artifacts", { recursive: true });
 async function tree(root, relative = "", skip = new Set()) {
   const result = {};

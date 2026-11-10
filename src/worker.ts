@@ -4,7 +4,7 @@ import { getAccountPageRanking } from "./domain/site";
 import { toAccount } from "./domain/view";
 import { activeRecords } from "./domain/records";
 import { codeFor } from "./domain/otp";
-import { otpTime } from "./platform/time";
+import { otpTime, readTimeCalibration } from "./platform/time";
 import { installInputMenu } from "./platform/inputMenu";
 import { nativeTouchID, TouchIDError } from "./platform/touchID";
 import { parseTransfer } from "./domain/transfer";
@@ -277,18 +277,38 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
       const accounts = ranking.accounts.filter((item) =>
         ranking.suggestedAccountIds.has(item.id),
       );
-      if (value.type === "input-menu:accounts")
+      if (value.type === "input-menu:accounts") {
+        const first = accounts
+          .map((account) => workspace.records[account.id]!)
+          .find((account) => account.mode !== "hotp");
         return {
           ok: true,
           accounts: accounts.map(({ id, issuer, label }) => ({
             id,
             issuer,
             label,
+            digits: workspace.records[id]!.digits,
+            period:
+              workspace.records[id]!.mode === "hotp"
+                ? null
+                : workspace.records[id]!.interval,
           })),
+          ...(first && first.mode !== "hotp"
+            ? {
+                countdown: {
+                  period: first.interval,
+                  offsetMs: (await readTimeCalibration())?.offsetMs ?? 0,
+                },
+              }
+            : {}),
         };
+      }
       const selected = accounts.find((item) => item.id === value.accountId);
       if (!selected) throw new InputError("invalid");
-      const code = await codeFor(workspace.records[selected.id]!, await otpTime());
+      const code = await codeFor(
+        workspace.records[selected.id]!,
+        await otpTime(),
+      );
       const current = await readWorkspace();
       if (
         !current.preferences.inputMenu ||

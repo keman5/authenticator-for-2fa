@@ -36,10 +36,10 @@ pnpm run check
 pnpm run test
 ```
 
-`build.sh` increments the patch version by default. To reproduce a submitted source archive without changing its version, read that version and pass it explicitly through `BUILD_VERSION` in a disposable extracted source copy:
+`build.sh` increments the patch version by default. To reproduce a submitted source archive without changing its version, read the extension release version and pass it explicitly through `BUILD_VERSION` in a disposable extracted source copy:
 
 ```sh
-BUILD_VERSION="$(node -p 'require("./package.json").version')" ./build.sh
+BUILD_VERSION="$(node -p 'require("./package.json").extensionVersion ?? require("./package.json").version')" ./build.sh
 ```
 
 Compare the extracted submitted Firefox ZIP with `dist/firefox/`. Compare file contents rather than ZIP timestamps or Mozilla-added signature files. React, QR and other dependencies are fetched by pnpm; bundled ZXing WASM comes from the locked `zxing-wasm` package. No runtime remote code is needed. The extension resources do not require Xcode or the native companion to build. Do not use `build.sh store` for source reproduction; that additionally captures promotional screenshots with local Edge.

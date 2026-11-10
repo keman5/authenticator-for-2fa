@@ -8,6 +8,7 @@ A browser extension for generating and managing TOTP, HOTP and Steam verificatio
 
 - Add accounts manually, import `otpauth://` links, QR images, Google migration QR codes, or JSON backups. Search, edit and reorder accounts from the code list.
 - Click a code to copy it. HOTP has an explicit next-code action. Optional page fill writes only to identifiable OTP inputs and never submits a form.
+- Optional page enhancement places its icon outside the OTP field's upper-right corner. Hover the icon for site-matched accounts; codes start masked with `*`, reveal only for the hovered or keyboard-focused row, and turn red in the final five seconds. Leaving a row masks it again. Only clicking an account fills the field.
 - Password protection is off initially. Enable a screen password in Settings; one character is sufficient. This is an **interface lock**: account secrets remain unencrypted in this extension's local storage.
 - The normal action defaults to Command+Shift+2 on macOS / Ctrl+Shift+2 elsewhere. Manage it from Settings → Passkey & shortcuts. Shortcuts follow the same screen-lock policy as clicking the extension icon.
 - Auto-lock defaults to closing the panel. Choices are filtered by seconds, minutes, hours and days, with lock-on-close and never always available. Other choices are 30 seconds, every minute from 1–10 minutes, 30 minutes, every hour from 1–24 hours, every day from 3–30 days, or forever. Successful password, passkey or Touch ID authentication starts a fresh deadline. Normal reopening and browser restart preserve access until that deadline; activity does not extend it. Explicit Lock clears the cached timestamp, including for forever. Timed panels check expiry once per second.
@@ -27,7 +28,7 @@ pnpm run build
 ./build.sh package
 ```
 
-Build an exact release version with `BUILD_VERSION=1.0.0 ./build.sh package`; without `BUILD_VERSION`, the script increments the patch version automatically.
+Build the requested `1.0` release with `BUILD_VERSION=1.0 ./build.sh store`. `extensionVersion` records the exact manifest/archive version; `package.json` keeps the corresponding npm-compatible `1.0.0`. Without `BUILD_VERSION`, the script increments the patch version automatically.
 
 `build.sh` performs all builds locally and cleans Go's build cache when Go is available, plus this project's `.artifacts` cache. Output resources are `dist/chrome`, `dist/edge`, `dist/firefox` and `dist/safari`. Package archives and a review-source archive appear in `artifacts/` and are copied to `~/Downloads/dist/`. Third-party license notices are included. No build installs an extension, modifies browser profiles or publishes a release.
 
