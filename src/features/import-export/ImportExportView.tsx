@@ -219,7 +219,7 @@ export function ImportExportView({
             />
             <div className="btn-row export-actions">
               <button
-                className="btn-primary"
+                className="btn btn-primary"
                 type="button"
                 onClick={() => void importText()}
                 disabled={busy || !text.trim()}
@@ -243,7 +243,7 @@ export function ImportExportView({
             </p>
             <div className="btn-row">
               <button
-                className="btn-primary"
+                className="btn btn-primary"
                 type="button"
                 disabled={busy || !password}
                 onClick={() => void importPending()}
@@ -251,7 +251,7 @@ export function ImportExportView({
                 {tr('import')}
               </button>
               <button
-                className="btn-soft"
+                className="btn btn-soft"
                 type="button"
                 disabled={busy}
                 onClick={() => {
@@ -313,7 +313,7 @@ export function ImportExportView({
         )}
         <div className="btn-row export-actions">
           <button
-            className="btn-primary"
+            className="btn btn-primary"
             type="button"
             disabled={
               busy ||
@@ -328,7 +328,7 @@ export function ImportExportView({
             {ui('exportBtn')}
           </button>
           <button
-            className="btn-soft"
+            className="btn btn-soft"
             type="button"
             disabled={busy || !vault.accounts.length}
             onClick={() => onQr(vault.sortedAccounts)}

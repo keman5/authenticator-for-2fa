@@ -577,7 +577,7 @@ test("page-scan retains the scanner, shows progress and a persistent result, and
       "Authenticator accounts added: 1",
     ),
   );
-  expect(document.querySelector(".confetti")).not.toBeNull();
+  await waitFor(() => expect(document.querySelector(".confetti")).not.toBeNull());
   expect(
     screen.getByRole("button", { name: "Capture screen & detect" }),
   ).toBeTruthy();

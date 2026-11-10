@@ -53,7 +53,7 @@ export function QrView({
       {accounts.length > 1 && (
         <div className="qr-pagination">
           <button
-            className="btn-soft"
+            className="btn btn-soft"
             type="button"
             onClick={() =>
               setSelectedId(
@@ -67,7 +67,7 @@ export function QrView({
             {index + 1} / {accounts.length}
           </span>
           <button
-            className="btn-soft"
+            className="btn btn-soft"
             type="button"
             onClick={() =>
               setSelectedId(accounts[(index + 1) % accounts.length]?.id)
@@ -79,7 +79,7 @@ export function QrView({
       )}
       <div className="qr-actions">
         <button
-          className="btn-soft"
+          className="btn btn-soft"
           type="button"
           disabled={!uri}
           onClick={() => {
@@ -93,7 +93,7 @@ export function QrView({
         </button>
         {image && (
           <a
-            className="btn-soft"
+            className="btn btn-soft"
             href={image}
             download={`${
               [account.issuer, account.label]

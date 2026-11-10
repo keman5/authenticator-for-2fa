@@ -67,10 +67,11 @@ export function AccountForm({
     }
   }
   return (
-    <form onSubmit={save} noValidate>
+    <form className="account-form" onSubmit={save} noValidate>
       <div className="field">
         <label htmlFor="account-issuer">{ui('mName')}</label>
         <input
+          className="input"
           type="text"
           id="account-issuer"
           value={draft.issuer}
@@ -81,6 +82,7 @@ export function AccountForm({
       <div className="field">
         <label htmlFor="account-label">{ui('mAcct')}</label>
         <input
+          className="input"
           type="text"
           id="account-label"
           value={draft.label}
@@ -92,6 +94,7 @@ export function AccountForm({
       <div className="field">
         <label htmlFor="account-secret">{ui('mSecret')}</label>
         <input
+          className="input"
           type="text"
           id="account-secret"
           value={draft.secret}
@@ -104,6 +107,7 @@ export function AccountForm({
       <div className="field">
         <label htmlFor="account-site">{ui('eSite')}</label>
         <input
+          className="input"
           type="text"
           id="account-site"
           value={draft.site ?? ''}
@@ -120,46 +124,54 @@ export function AccountForm({
             value,
             label: tr(value as OtpType)
           }))}
-          onChange={(value) => patch({
-            type: value as OtpType,
-            ...(value !== 'steam' && !NUMERIC_OTP_DIGITS.some((digits) => digits === draft.digits)
-              ? { digits: NUMERIC_OTP_DIGITS[0] }
-              : {})
-          })}
-        />
-      </Field>
-      <Field label={ui('digitsLabel')}>
-        <Select
-          label={ui('digitsLabel')}
-          value={String(draft.type === 'steam' ? 5 : draft.digits)}
-          disabled={draft.type === 'steam'}
-          options={(draft.type === 'steam' ? [5] : NUMERIC_OTP_DIGITS).map((value) => ({
-            value: String(value),
-            label: String(value)
-          }))}
-          onChange={(value) => patch({ digits: Number(value) })}
-        />
-      </Field>
-      <div className="field">
-        <label htmlFor="account-period">
-          {draft.type === 'hotp' ? tr('counter') : ui('stepLabel')}
-        </label>
-        <input
-          id="account-period"
-          type="number"
-          min={draft.type === 'hotp' ? 0 : 5}
-          max={draft.type === 'hotp' ? undefined : 300}
-          value={draft.type === 'hotp' ? draft.counter : draft.period}
-          onChange={(e) =>
-            patch(
-              draft.type === 'hotp'
-                ? { counter: Number(e.target.value) }
-                : { period: Number(e.target.value) }
-            )
+          onChange={(value) =>
+            patch({
+              type: value as OtpType,
+              ...(value !== 'steam' &&
+              !NUMERIC_OTP_DIGITS.some((digits) => digits === draft.digits)
+                ? { digits: NUMERIC_OTP_DIGITS[0] }
+                : {})
+            })
           }
-          required
-          disabled={draft.type === 'steam'}
         />
+      </Field>
+      <div className="form-grid">
+        <Field label={ui('digitsLabel')}>
+          <Select
+            label={ui('digitsLabel')}
+            value={String(draft.type === 'steam' ? 5 : draft.digits)}
+            disabled={draft.type === 'steam'}
+            options={(draft.type === 'steam' ? [5] : NUMERIC_OTP_DIGITS).map(
+              (value) => ({
+                value: String(value),
+                label: String(value)
+              })
+            )}
+            onChange={(value) => patch({ digits: Number(value) })}
+          />
+        </Field>
+        <div className="field">
+          <label htmlFor="account-period">
+            {draft.type === 'hotp' ? tr('counter') : ui('stepLabel')}
+          </label>
+          <input
+            className="input"
+            id="account-period"
+            type="number"
+            min={draft.type === 'hotp' ? 0 : 5}
+            max={draft.type === 'hotp' ? undefined : 300}
+            value={draft.type === 'hotp' ? draft.counter : draft.period}
+            onChange={(e) =>
+              patch(
+                draft.type === 'hotp'
+                  ? { counter: Number(e.target.value) }
+                  : { period: Number(e.target.value) }
+              )
+            }
+            required
+            disabled={draft.type === 'steam'}
+          />
+        </div>
       </div>
       <Field label={ui('algoLabel')}>
         <Segmented
@@ -174,12 +186,12 @@ export function AccountForm({
         />
       </Field>
       <div className="btn-row">
-        <button className="btn-primary" type="submit" disabled={busy}>
+        <button className="btn btn-primary" type="submit" disabled={busy}>
           {ui(initial ? 'save' : 'saveAccount')}
         </button>
         {onDelete && (
           <button
-            className="btn-danger-soft"
+            className="btn btn-danger-soft"
             type="button"
             onClick={onDelete}
             disabled={busy}

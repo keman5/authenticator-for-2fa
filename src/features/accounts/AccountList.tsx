@@ -9,6 +9,7 @@ import {
 import { createPortal } from 'react-dom';
 import {
   MoreHorizontal,
+  KeyRound,
   Pencil,
   QrCode,
   Star,
@@ -199,6 +200,10 @@ export function AccountList({
   }
   return (
     <>
+      <div className="account-heading">
+        <h2>{ui('navCodes')}</h2>
+        <span className="account-count">{vault.accounts.length}</span>
+      </div>
       <div className="chips" aria-label={tr('accounts')}>
         {(['all', 'fav', 'site'] as const).map((item) => (
           <button
@@ -277,7 +282,6 @@ export function AccountList({
                 <button
                   type="button"
                   className="avatar drag-handle"
-                  style={{ background: 'var(--blue-dark)' }}
                   aria-label={`${tr('reorderAccount')}: ${account.issuer || account.label}`}
                   disabled={!canReorder}
                   onPointerDown={(event) => start(event, account)}
@@ -332,8 +336,8 @@ export function AccountList({
                     </span>
                   </div>
                 </button>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <div className="flex items-center gap-1">
+                <div className="account-actions">
+                  <div className="account-tools">
                     {account.type === 'hotp' && (
                       <button
                         className="menu-btn"
@@ -457,9 +461,11 @@ export function AccountList({
       )}
       {accounts.length === 0 && (
         <div className="empty visible">
-          {vault.accounts.length ? ui('empty1') : tr('empty')}
-          <br />
-          {vault.accounts.length ? ui('empty2') : tr('emptyHint')}
+          <div className="empty-symbol">
+            <KeyRound size={28} strokeWidth={1.4} aria-hidden="true" />
+          </div>
+          <strong>{vault.accounts.length ? ui('empty1') : tr('empty')}</strong>
+          <p>{vault.accounts.length ? ui('empty2') : tr('emptyHint')}</p>
         </div>
       )}
       {deleting && (

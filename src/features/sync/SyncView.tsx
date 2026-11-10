@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { useCopy, useVault } from '../../app/vault';
 import { Confirm, ErrorMessage, Header } from '../../shared/ui/controls';
 import {
@@ -25,9 +25,12 @@ export function SyncView({
     [working, setWorking] = useState(false),
     [confirmation, setConfirmation] = useState<'stop' | 'delete' | null>(null);
   const busy = working || vault.busy || vault.syncStatus === 'syncing';
-  useEffect(() => () => {
-    vault.syncError = null;
-  }, [vault]);
+  useEffect(
+    () => () => {
+      vault.syncError = null;
+    },
+    [vault]
+  );
   async function connect() {
     if (busy || (mode === 'create' && !saved)) return;
     setError('');
@@ -104,17 +107,23 @@ export function SyncView({
           }
         }}
       />
-      <div className="section-label">{ui('howSec')}</div>
-      <div className="how-card">
-        {(
-          ['syncFeatureEncrypted', 'syncFeatureBrowser', 'syncScope'] as const
-        ).map((key, index) => (
-          <div className="how-step" key={key}>
-            <span className="n">{index + 1}</span>
-            <p>{tr(key)}</p>
-          </div>
-        ))}
-      </div>
+      <details className="sync-help">
+        <summary>
+          <ShieldCheck size={16} aria-hidden="true" />
+          <span>{ui('howSec')}</span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </summary>
+        <div className="how-card">
+          {(
+            ['syncFeatureEncrypted', 'syncFeatureBrowser', 'syncScope'] as const
+          ).map((key, index) => (
+            <div className="how-step" key={key}>
+              <span className="n">{index + 1}</span>
+              <p>{tr(key)}</p>
+            </div>
+          ))}
+        </div>
+      </details>
       <p className="muted" style={{ marginTop: 8 }}>
         {tr('syncRequirements')}
       </p>
@@ -124,7 +133,11 @@ export function SyncView({
         <div className="sync-panel" style={{ marginTop: 14 }}>
           <p className="desc">{tr('syncProtectionRequired')}</p>
           <div className="btn-row" style={{ marginTop: 16 }}>
-            <button className="btn-primary" type="button" onClick={onProtect}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={onProtect}
+            >
               {tr('setPassword')}
             </button>
           </div>
@@ -183,7 +196,7 @@ export function SyncView({
           <div className="sync-panel">
             <div className="btn-row">
               <button
-                className="btn-primary"
+                className="btn btn-primary"
                 type="button"
                 disabled={busy}
                 onClick={() => void sync()}
@@ -191,7 +204,7 @@ export function SyncView({
                 {busy ? tr('syncSyncing') : ui('syncNow')}
               </button>
               <button
-                className="btn-soft"
+                className="btn btn-soft"
                 type="button"
                 disabled={busy}
                 onClick={() => confirm('stop')}
@@ -305,7 +318,7 @@ export function SyncView({
             )}
             <div className="btn-row">
               <button
-                className="btn-primary"
+                className="btn btn-primary"
                 type="submit"
                 disabled={busy || !key.trim() || (mode === 'create' && !saved)}
               >

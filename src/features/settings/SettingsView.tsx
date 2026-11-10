@@ -85,7 +85,9 @@ export function SettingsView({
           />
         </div>
       </div>
-      <div className="list-card" style={{ marginTop: 12 }}><TimeCalibration /></div>
+      <div className="list-card" style={{ marginTop: 12 }}>
+        <TimeCalibration />
+      </div>
       <div className="section-label">{ui("behaviorSec")}</div>
       <div className="list-card">
         <Switch
@@ -253,7 +255,7 @@ export function SettingsView({
           </span>
           {id && (
             <button
-              className="btn-ghost"
+              className="btn btn-ghost"
               type="button"
               onClick={() => {
                 void navigator.clipboard
@@ -345,7 +347,7 @@ export function PasswordView({ onBack }: { onBack: () => void }) {
         </p>
         <div className="btn-row">
           <button
-            className="btn-primary"
+            className="btn btn-primary"
             type="submit"
             disabled={vault.busy || password.length < 1}
           >
@@ -353,7 +355,7 @@ export function PasswordView({ onBack }: { onBack: () => void }) {
           </button>
           {vault.passwordProtected && (
             <button
-              className="btn-danger-soft"
+              className="btn btn-danger-soft"
               type="button"
               disabled={vault.busy || vault.syncEnabled}
               onClick={() => {
@@ -438,7 +440,7 @@ export function PasskeyView({
           </span>
           {(registered || vault.passwordProtected) && (
             <button
-              className={registered ? "btn-danger-soft" : "btn-ghost"}
+              className={registered ? "btn btn-danger-soft" : "btn btn-ghost"}
               type="button"
               disabled={busy}
               onClick={() => (registered ? setRemoving(true) : void register())}
@@ -464,7 +466,7 @@ export function PasskeyView({
       )}
       {!vault.passwordProtected && (
         <div className="btn-row" style={{ marginTop: 16 }}>
-          <button className="btn-primary" type="button" onClick={onProtect}>
+          <button className="btn btn-primary" type="button" onClick={onProtect}>
             {tr("setPassword")}
           </button>
         </div>
@@ -499,7 +501,7 @@ export function PasskeyView({
         shortcutsPage(chrome.runtime.getURL(""), navigator.userAgent) && (
           <div className="btn-row" style={{ marginTop: 12 }}>
             <button
-              className="btn-soft"
+              className="btn btn-soft"
               type="button"
               onClick={() => {
                 void openShortcutSettings().catch((error) =>

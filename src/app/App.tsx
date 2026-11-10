@@ -388,7 +388,7 @@ function Application() {
         ? 'settings'
         : 'codes';
   return (
-    <div className="pui" id="popup" data-theme={theme}>
+    <div className="pui" id="popup" data-theme={theme} data-view={view}>
       <header className="p-head" inert={vault.locked || undefined}>
         <div className="brand-logo" role="img" aria-label={ui('brandAria')}>
           <Logo
@@ -398,8 +398,32 @@ function Application() {
             period={logoAccount?.period ?? 30}
           />
         </div>
+        <span className="brand-name" dir="ltr">
+          Authenticator - 2FA
+        </span>
+        <button
+          className="icon-btn"
+          type="button"
+          aria-label={ui('lock')}
+          disabled={!vault.passwordProtected || vault.locked}
+          onClick={() => void vault.lock()}
+        >
+          <Lock size={16} />
+        </button>
+        <button
+          className="add-btn"
+          type="button"
+          aria-label={ui('addAccount')}
+          disabled={vault.locked}
+          onClick={() => {
+            setAddMode('scan');
+            setView('add');
+          }}
+        >
+          <Plus size={19} />
+        </button>
         <div className={`search ${query ? 'has-text' : ''}`}>
-          <Search size={14} />
+          <Search size={16} />
           <input
             type="search"
             value={query}
@@ -421,27 +445,6 @@ function Application() {
             <X size={14} />
           </button>
         </div>
-        <button
-          className="icon-btn"
-          type="button"
-          aria-label={ui('lock')}
-          disabled={!vault.passwordProtected || vault.locked}
-          onClick={() => void vault.lock()}
-        >
-          <Lock size={15} />
-        </button>
-        <button
-          className="add-btn"
-          type="button"
-          aria-label={ui('addAccount')}
-          disabled={vault.locked}
-          onClick={() => {
-            setAddMode('scan');
-            setView('add');
-          }}
-        >
-          <Plus size={15} />
-        </button>
       </header>
       <main ref={body} className="p-body" inert={vault.locked || undefined}>
         {vault.locked ? null : !vault.initialized || !contextReady ? (
@@ -488,12 +491,16 @@ function Application() {
                   title={ui('addTitle')}
                   onBack={() => setView('codes')}
                 />
-                <div className="seg">
+                <div
+                  className="seg join"
+                  role="group"
+                  aria-label={ui('addTitle')}
+                >
                   {(['scan', 'manual'] as const).map((mode) => (
                     <button
                       type="button"
                       key={mode}
-                      className={mode === addMode ? 'active' : ''}
+                      className={`btn join-item ${mode === addMode ? 'active' : ''}`}
                       aria-pressed={mode === addMode}
                       onClick={() => setAddMode(mode)}
                     >
@@ -564,7 +571,7 @@ function Application() {
               if (body.current) body.current.scrollTop = 0;
             }}
           >
-            <Icon size={15} />
+            <Icon size={19} />
             <span>{ui(key)}</span>
           </button>
         ))}
@@ -591,7 +598,7 @@ function Application() {
         <div className="alert-message" role="alert">
           <span>{feedback(vault.error)}</span>
           <button
-            className="btn-ghost"
+            className="btn btn-ghost"
             type="button"
             aria-label={tr('cancel')}
             onClick={() => {
@@ -678,7 +685,9 @@ function LockScreen({
   return (
     <div className="lock-screen show">
       <div className="lock-content">
-        <Logo size={46} />
+        <div className="lock-emblem">
+          <Logo size={52} />
+        </div>
         <h2>{ui('locked')}</h2>
         <p>{tr('unlockTitle')}</p>
         <form
@@ -697,14 +706,14 @@ function LockScreen({
           />
           <div className="btn-row">
             <button
-              className="btn-primary"
+              className="btn btn-primary"
               type="submit"
               disabled={!ready || vault.busy || vault.locking || !password}
             >
               {ui('unlock')}
             </button>
             <button
-              className="btn-soft"
+              className="btn btn-soft"
               type="button"
               disabled={!ready || vault.busy || vault.locking}
               onClick={() => void unlockPasskey()}
@@ -713,7 +722,7 @@ function LockScreen({
             </button>
             {vault.touchIDEnabled && (
               <button
-                className="btn-soft"
+                className="btn btn-soft"
                 type="button"
                 disabled={!ready || vault.busy || vault.locking}
                 onClick={() => {

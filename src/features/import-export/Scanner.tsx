@@ -530,7 +530,7 @@ export function Scanner({
             </div>
             <div className="btn-row cam-actions">
               <button
-                className="btn-primary"
+                className="btn btn-primary"
                 type="button"
                 disabled={busy && !active}
                 onClick={() => (active ? stop() : void startCamera())}
@@ -539,7 +539,7 @@ export function Scanner({
               </button>
               {!needsCameraWindow() && (
                 <button
-                  className="btn-soft"
+                  className="btn btn-soft"
                   type="button"
                   disabled={busy}
                   onClick={() => {
@@ -560,11 +560,13 @@ export function Scanner({
       )}
       {mode === 'shot' && (
         <div className="screen-scan-panel">
-          <Monitor size={36} aria-hidden="true" />
+          <div className="scan-symbol">
+            <Monitor size={30} strokeWidth={1.5} aria-hidden="true" />
+          </div>
           <p className="desc">{ui('shotDesc')}</p>
           <div className="btn-row">
             <button
-              className="btn-primary"
+              className="btn btn-primary"
               type="button"
               disabled={busy && !screenAbort.current}
               onClick={() => (screenAbort.current ? stop() : void screenshot())}
@@ -573,7 +575,7 @@ export function Scanner({
               {screenAbort.current ? tr('cancel') : ui('shotBtn')}
             </button>
             <button
-              className="btn-soft"
+              className="btn btn-soft"
               type="button"
               disabled={busy}
               onClick={() => void scanPage()}

@@ -59,6 +59,7 @@ export function Password({
       <div className="recovery-wrap">
         <input
           ref={input}
+          className="input"
           id={id}
           type={shown ? "text" : "password"}
           minLength={1}
@@ -98,7 +99,7 @@ export function Header({
         onClick={onBack}
         aria-label={tr("back")}
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={21} />
       </button>
       <h2>{title}</h2>
     </div>
@@ -126,21 +127,22 @@ export function Switch({
   disabled?: boolean;
 }) {
   return (
-    <div className="list-row">
+    <label className="list-row switch-row">
       <span className="tx">
         <b>{label}</b>
         {hint && <small>{hint}</small>}
       </span>
-      <button
-        type="button"
-        className={`switch ${checked ? "on" : ""}`}
+      <input
+        type="checkbox"
+        className="toggle toggle-primary"
+        checked={checked}
         role="switch"
         aria-label={label}
         aria-checked={checked}
         disabled={disabled}
-        onClick={() => onChange(!checked)}
+        onChange={(event) => onChange(event.target.checked)}
       />
-    </div>
+    </label>
   );
 }
 export function Segmented({
@@ -160,7 +162,7 @@ export function Segmented({
     <div className="seg join" role="group" aria-label={label}>
       {options.map((option) => (
         <button
-          className={`join-item ${option.value === value ? "active" : ""}`}
+          className={`btn join-item ${option.value === value ? "active" : ""}`}
           type="button"
           key={option.value}
           aria-pressed={option.value === value}
@@ -461,7 +463,7 @@ export function FilePicker({
   return (
     <>
       <button
-        className="btn-soft"
+        className="btn btn-soft"
         type="button"
         disabled={disabled}
         title={[

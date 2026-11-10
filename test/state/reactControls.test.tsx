@@ -6,7 +6,8 @@ import {
   FilePicker,
   Logo,
   Password,
-  Select
+  Select,
+  Switch
 } from '../../src/shared/ui/controls';
 afterEach(cleanup);
 test('Escape cancels destructive confirmation without accepting and does not take initial focus', () => {
@@ -157,3 +158,23 @@ test.each([30, 60, 120])(
     ]);
   }
 );
+
+test('a setting toggle can be activated from its descriptive label and respects disabled state', () => {
+  const change = vi.fn();
+  const toggle = (disabled = false) => (
+    <Switch
+      label="Hide codes"
+      hint="Reveal codes when needed"
+      checked={false}
+      onChange={change}
+      disabled={disabled}
+    />
+  );
+  const { rerender } = render(toggle());
+  fireEvent.click(screen.getByText('Reveal codes when needed'));
+  expect(change).toHaveBeenCalledExactlyOnceWith(true);
+  rerender(toggle(true));
+  fireEvent.click(screen.getByText('Reveal codes when needed'));
+  expect(change).toHaveBeenCalledTimes(1);
+  expect(document.activeElement).toBe(document.body);
+});

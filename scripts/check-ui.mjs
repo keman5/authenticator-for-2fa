@@ -174,7 +174,7 @@ try {
       const bounds = await page.evaluate(
         "(()=>{const r=document.querySelector('.p-nav').getBoundingClientRect();return {height:r.height,bottom:r.bottom,width:document.documentElement.scrollWidth}})()",
       );
-      assert.equal(bounds.height, 40);
+      assert.equal(bounds.height, 64);
       assert.equal(bounds.bottom, height);
       assert.ok(bounds.width <= 370);
     }
@@ -186,7 +186,7 @@ try {
     await page.evaluate(
       "document.querySelector('.brand-logo svg').getBoundingClientRect().width",
     ),
-    32,
+    34,
   );
   await click("Add account");
   await until(
@@ -377,7 +377,7 @@ try {
   await page.call("Page.reload");
   await until(locked, "explicit lock survives reload");
   console.log(
-    "PASS actual headless Edge: React UI, real PNG/WASM import, 370px layout at 7 heights, 32px header icon, one-character password, rejected legacy bypass URLs, shortcut settings navigation, grouped auto-lock selection, restart, fixed deadlines.",
+    "PASS actual headless Edge: React UI, real PNG/WASM import, 370px layout at 7 heights, 34px header icon, one-character password, rejected legacy bypass URLs, shortcut settings navigation, grouped auto-lock selection, restart, fixed deadlines.",
   );
 } catch (error) {
   if (page)
