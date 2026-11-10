@@ -15,18 +15,21 @@ export function QrView({
 }) {
   const { ui, tr } = useCopy(),
     vault = useVault();
-  const [index, setIndex] = useState(0),
-    [image, setImage] = useState(''),
+  const [selectedId, setSelectedId] = useState(accounts[0]?.id),
+    [rendered, setRendered] = useState({ uri: '', image: '' }),
     [error, setError] = useState('');
-  const account = accounts[index];
+  const account =
+    accounts.find((account) => account.id === selectedId) ?? accounts[0];
+  const index = account ? accounts.indexOf(account) : 0;
   const uri = account ? accountToOtpAuthUri(account) : '';
+  const image = rendered.uri === uri ? rendered.image : '';
   useEffect(() => {
     let current = true;
-    setImage('');
     setError('');
+    if (!uri) return;
     void renderQrDataUrl(uri)
       .then((url) => {
-        if (current) setImage(url);
+        if (current) setRendered({ uri, image: url });
       })
       .catch((error) => {
         if (current) setError(getErrorMessage(error, tr('exportFailed')));
@@ -53,7 +56,9 @@ export function QrView({
             className="btn-soft"
             type="button"
             onClick={() =>
-              setIndex((index - 1 + accounts.length) % accounts.length)
+              setSelectedId(
+                accounts[(index - 1 + accounts.length) % accounts.length]?.id
+              )
             }
           >
             {ui('prev')}
@@ -64,7 +69,9 @@ export function QrView({
           <button
             className="btn-soft"
             type="button"
-            onClick={() => setIndex((index + 1) % accounts.length)}
+            onClick={() =>
+              setSelectedId(accounts[(index + 1) % accounts.length]?.id)
+            }
           >
             {ui('next')}
           </button>

@@ -27,6 +27,43 @@ async function open() {
   await vault.initialize();
   return vault;
 }
+test.each([false, true])(
+  "a later favorite change preserves consumed HOTP counters when advanced device syncs first: %s",
+  async (advancedFirst) => {
+    const network = createBrowserSyncNetwork();
+    const da = network.createDevice(),
+      db = network.createDevice();
+    let now = Date.now();
+    vi.spyOn(Date, "now").mockImplementation(() => now);
+    da.install();
+    const a = await open();
+    await a.addAccount({ ...original, type: "hotp", counter: 0 });
+    await a.changePassword("", "1");
+    const key = recoveryKey();
+    await a.startBrowserSync(key, false);
+    db.install();
+    const b = await open();
+    await b.changePassword("", "1");
+    await b.startBrowserSync(key, true);
+    const initialCode = b.codes[b.accounts[0].id].value;
+    da.install();
+    now += 1000;
+    await a.advanceHotp(a.accounts[0]);
+    if (advancedFirst) await a.syncNow();
+    db.install();
+    now += 1000;
+    await b.updateAccount(b.accounts[0], { favorite: true });
+    await b.syncNow();
+    da.install();
+    await a.syncNow();
+    db.install();
+    await b.syncNow();
+    for (const vault of [a, b]) {
+      expect(vault.accounts[0]).toMatchObject({ counter: 1, favorite: true });
+      expect(vault.codes[vault.accounts[0].id].value).not.toBe(initialCode);
+    }
+  },
+);
 test("reimporting an old QR preserves the edited account and skips its occupied ID", async () => {
   const vault = await open();
   const saved = await vault.addAccount(original);

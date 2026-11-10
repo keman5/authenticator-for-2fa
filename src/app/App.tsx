@@ -110,7 +110,7 @@ function Application() {
     [addMode, setAddMode] = useState<'scan' | 'manual'>('scan'),
     [editing, setEditing] = useState<AuthenticatorAccount | null>(null),
     [deleting, setDeleting] = useState<AuthenticatorAccount | null>(null),
-    [qrAccounts, setQrAccounts] = useState<AuthenticatorAccount[]>([]),
+    [qrAccountIds, setQrAccountIds] = useState<string[]>([]),
     [context, setContext] = useState<PageContext | null>(null),
     [contextReady, setContextReady] = useState(false),
     [systemDark, setSystemDark] = useState(
@@ -122,6 +122,16 @@ function Application() {
     pendingRoute = useRef(readAppRoute(window.location.href)),
     qrFrom = useRef<View>('codes'),
     celebrationComplete = useRef<(() => void) | undefined>(undefined);
+  const qrAccounts = qrAccountIds.flatMap((id) => {
+    const account = vault.accounts.find((account) => account.id === id);
+    return account ? [account] : [];
+  });
+  useEffect(() => {
+    if (view === 'qr' && qrAccounts.length === 0) {
+      setQrAccountIds([]);
+      setView(qrFrom.current);
+    }
+  }, [view, qrAccounts.length]);
   const celebrate = useCallback((onComplete?: () => void) => {
     celebrationComplete.current = onComplete;
     setCelebration((value) => value + 1);
@@ -250,7 +260,7 @@ function Application() {
       setView('codes');
       setEditing(null);
       setDeleting(null);
-      setQrAccounts([]);
+      setQrAccountIds([]);
       setQuery('');
       setScannedAccountIds([]);
       setContext(null);
@@ -261,7 +271,7 @@ function Application() {
       setView('codes');
       setEditing(null);
       setDeleting(null);
-      setQrAccounts([]);
+      setQrAccountIds([]);
       setQuery('');
     }
   }, [vault.initialized, vault.hasVault]);
@@ -326,7 +336,7 @@ function Application() {
   useAutoLock(vault);
   function showQr(accounts: AuthenticatorAccount[]) {
     qrFrom.current = view;
-    setQrAccounts(accounts.map((account) => ({ ...account })));
+    setQrAccountIds(accounts.map((account) => account.id));
     setView('qr');
   }
   async function copy(code: string, fill = false) {
@@ -527,7 +537,7 @@ function Application() {
               <QrView
                 accounts={qrAccounts}
                 onBack={() => {
-                  setQrAccounts([]);
+                  setQrAccountIds([]);
                   setView(qrFrom.current);
                 }}
               />

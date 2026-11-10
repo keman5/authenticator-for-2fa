@@ -184,14 +184,34 @@ export function mergeRecords(
   const merged = { ...left };
   for (const [id, value] of Object.entries(right)) {
     const old = merged[id];
+    const sameHotp =
+      old?.mode === "hotp" &&
+      value.mode === "hotp" &&
+      old.secret === value.secret &&
+      old.hash === value.hash &&
+      old.digits === value.digits;
     if (
       !old ||
       value.changed > old.changed ||
       (value.changed === old.changed &&
-        JSON.stringify({ ...value, position: 0 }) >
-          JSON.stringify({ ...old, position: 0 }))
+        JSON.stringify({
+          ...value,
+          position: 0,
+          counter: sameHotp ? 0 : value.counter,
+        }) >
+          JSON.stringify({
+            ...old,
+            position: 0,
+            counter: sameHotp ? 0 : old.counter,
+          }))
     )
       merged[id] = value;
+    // Metadata edits must not reissue HOTP codes already consumed on another device.
+    if (sameHotp)
+      merged[id] = {
+        ...merged[id]!,
+        counter: Math.max(old.counter, value.counter),
+      };
   }
   return merged;
 }

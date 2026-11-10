@@ -208,6 +208,42 @@ describe("record transactions", () => {
     expect(matchesSite(item, "badexample.com")).toBe(false);
     expect(matchesSite(item, "example.com.attacker.test")).toBe(false);
   });
+  it("merges HOTP counters independently of tied metadata and keeps deletion", async () => {
+    const a = await identify(
+      credential({ mode: "hotp", counter: 9, changed: 10 }),
+    );
+    const b = { ...a, counter: 0, favorite: true };
+    const c = { ...a, counter: 3, removed: true, changed: 11 };
+    const merge = (left: typeof a, right: typeof a) =>
+      mergeRecords({ [a.id]: left }, { [a.id]: right })[a.id]!;
+    const ab = merge(a, b);
+    expect(ab).toEqual(merge(b, a));
+    expect(ab).toMatchObject({ counter: 9, favorite: true });
+    expect(merge(ab, c)).toEqual(merge(a, merge(b, c)));
+    expect(merge(ab, c)).toMatchObject({ counter: 9, removed: true });
+    expect(a.counter).toBe(9);
+    expect(b.counter).toBe(0);
+  });
+  it.each([
+    { secret: "JBSWY3DPEHPK3PXP" },
+    { mode: "totp" as const },
+    { hash: "SHA-256" as const },
+    { digits: 8 },
+  ])(
+    "does not transfer old HOTP counters to a changed OTP configuration: %j",
+    async (patch) => {
+      const old = await identify(
+        credential({ mode: "hotp", counter: 100, changed: 10 }),
+      );
+      const changed = { ...old, ...patch, counter: 0, changed: 11 };
+      expect(
+        mergeRecords({ [old.id]: old }, { [old.id]: changed })[old.id],
+      ).toEqual(changed);
+      expect(
+        mergeRecords({ [old.id]: changed }, { [old.id]: old })[old.id],
+      ).toEqual(changed);
+    },
+  );
 });
 describe("screen lock and encrypted portable copies", () => {
   it("starts unprotected and accepts one character passwords", async () => {
