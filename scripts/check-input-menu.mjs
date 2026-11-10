@@ -409,6 +409,84 @@ try {
     assert.equal(await getAccountNode(), undefined, "No menu on " + id);
     assert.equal(await page.run("document.querySelector('input').value"), "");
   }
+  // Keep a HOTP visible while the actual extension UI locks the shared vault.
+  await background.run(`(async () => {
+    const store = 'keman5.authenticator.workspace.v2';
+    const data = await chrome.storage.local.get(store);
+    const workspace = data[store];
+    Object.values(workspace.records)[0].mode = 'hotp';
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const material = await crypto.subtle.importKey('raw', new TextEncoder().encode('menu-test-password'), 'PBKDF2', false, ['deriveBits']);
+    const proof = await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'}, material, 256);
+    const encode = bytes => btoa(String.fromCharCode(...bytes));
+    workspace.gate = {salt:encode(salt),proof:encode(new Uint8Array(proof)),lockAfter:-1,unlockedAt:Date.now()};
+    await chrome.storage.local.set({[store]:workspace});
+  })()`);
+  const extensionRoot = worker.url.slice(0, worker.url.indexOf("/assets/"));
+  const app = await open(extensionRoot + "/index.html");
+  await until(
+    () =>
+      app.run(
+        "!!document.querySelector('button[aria-label=Lock]:not(:disabled)')",
+      ),
+    "unlocked extension UI",
+  );
+  await page.run(
+    "document.body.innerHTML='<input id=otp autocomplete=one-time-code>';document.querySelector('#otp').focus()",
+  );
+  const hotp = await until(getAccountNode, "HOTP menu");
+  const hotpObject = await page.call("DOM.resolveNode", {
+    backendNodeId: hotp.backendNodeId,
+  });
+  const hotpCode = async () =>
+    (
+      await page.call("Runtime.callFunctionOn", {
+        objectId: hotpObject.object.objectId,
+        functionDeclaration:
+          "function(){return this.querySelector('[data-authenticator-code]').textContent}",
+        returnByValue: true,
+      })
+    ).result.value;
+  await page.call("Runtime.callFunctionOn", {
+    objectId: hotpObject.object.objectId,
+    functionDeclaration:
+      "function(){this.dispatchEvent(new Event('pointerenter'))}",
+  });
+  await until(
+    async () => /^\d{6}$/.test(await hotpCode()),
+    "revealed HOTP before locking",
+  );
+  await app.run("document.querySelector('button[aria-label=Lock]').click()");
+  await until(
+    () =>
+      app.run(
+        "!!document.querySelector('input[autocomplete=current-password]')",
+      ),
+    "locked extension UI",
+  );
+  await until(
+    async () => !(await getAccountNode()),
+    "locking clears the existing page menu",
+  );
+  await app.run(`(() => {
+    const input = document.querySelector('input[autocomplete=current-password]');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'menu-test-password');
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+  })()`);
+  await app.run(
+    "document.querySelector('input[autocomplete=current-password]').form.requestSubmit()",
+  );
+  await until(
+    () =>
+      app.run(
+        "!document.querySelector('input[autocomplete=current-password]')",
+      ),
+    "unlocked extension UI again",
+  );
+  await until(
+    getAccountNode,
+    "unlock restores the page entry without refocusing",
+  );
   await background.run(
     "chrome.storage.local.get('keman5.authenticator.workspace.v2').then(async data=>{const v=data['keman5.authenticator.workspace.v2'];v.preferences.inputMenu=false;await chrome.storage.local.set({'keman5.authenticator.workspace.v2':v})})",
   );
@@ -425,7 +503,7 @@ try {
   await pause(200);
   assert.equal(await getAccountNode(), undefined);
   console.log(
-    "PASS Edge: matched OTP menu, dynamic two-factor dialog upper-right icon, labelled code fill, preserved non-code content, recognized OTP aliases, rejected sensitive fields and permission cleanup.",
+    "PASS Edge: matched OTP menu, dynamic two-factor dialog upper-right icon, labelled code fill, preserved non-code content, recognized OTP aliases, rejected sensitive fields, cleared revealed HOTP on UI lock, restored the entry on unlock and permission cleanup.",
   );
 } finally {
   for (const socket of sockets) socket.close();

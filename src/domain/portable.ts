@@ -28,7 +28,14 @@ export async function createEncryptedBackupFile(
     blob: new Blob(
       [
         await encryptedBackup(
-          { records: accounts.map((item) => toCredential(item)) },
+          {
+            app: "2fa-authenticator",
+            version: 1,
+            records: accounts.map((item) => ({
+              ...toCredential(item),
+              id: item.id,
+            })),
+          },
           password,
         ),
       ],

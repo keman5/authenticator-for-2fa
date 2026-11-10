@@ -341,7 +341,11 @@ export class AuthenticatorVault {
   async importEncryptedBackupText(text: string, password: string) {
     try {
       return await this.importText(
-        JSON.stringify({ accounts: await readBackupAccounts(text, password) }),
+        JSON.stringify({
+          app: "2fa-authenticator",
+          version: 1,
+          accounts: await readBackupAccounts(text, password),
+        }),
       );
     } catch (error) {
       if (
@@ -433,6 +437,7 @@ export class AuthenticatorVault {
     this.locked = false;
     this.accounts = activeRecords(workspace).map(toAccount);
     await this.refreshCodes();
+    this.scheduleSync();
   }
   async unlock(password: string) {
     const epoch = ++this.epoch;

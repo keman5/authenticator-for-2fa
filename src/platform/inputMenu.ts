@@ -29,21 +29,24 @@ export function installInputMenu() {
           chrome.permissions.contains({ origins: INPUT_MENU_ORIGINS }),
         ]);
         const enabled = Boolean(allowed && workspace.preferences.inputMenu);
-        if (previous === enabled) return;
-        const installed = await chrome.scripting.getRegisteredContentScripts({
-          ids: [id],
-        });
-        if (enabled && !installed.length)
-          await chrome.scripting.registerContentScripts([
-            {
-              id,
-              matches: INPUT_MENU_ORIGINS,
-              js: ["assets/injected.js"],
-              runAt: "document_idle",
-            },
-          ]);
-        if (!enabled && installed.length)
-          await chrome.scripting.unregisterContentScripts({ ids: [id] });
+        const registrationChanged = previous !== enabled;
+        if (!registrationChanged && !changes?.[DOCUMENT_KEY]) return;
+        if (registrationChanged) {
+          const installed = await chrome.scripting.getRegisteredContentScripts({
+            ids: [id],
+          });
+          if (enabled && !installed.length)
+            await chrome.scripting.registerContentScripts([
+              {
+                id,
+                matches: INPUT_MENU_ORIGINS,
+                js: ["assets/injected.js"],
+                runAt: "document_idle",
+              },
+            ]);
+          if (!enabled && installed.length)
+            await chrome.scripting.unregisterContentScripts({ ids: [id] });
+        }
         const tabs = await chrome.tabs.query({});
         await Promise.allSettled(
           tabs
@@ -51,7 +54,7 @@ export function installInputMenu() {
               (tab) => tab.id !== undefined && /^https?:/.test(tab.url ?? ""),
             )
             .map(async (tab) => {
-              if (enabled)
+              if (enabled && registrationChanged)
                 await chrome.scripting.executeScript({
                   target: { tabId: tab.id! },
                   files: ["assets/injected.js"],
@@ -59,6 +62,7 @@ export function installInputMenu() {
               else
                 await chrome.tabs.sendMessage(tab.id!, {
                   kind: "input-menu:refresh",
+                  rediscover: enabled,
                 });
             }),
         );

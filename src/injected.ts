@@ -310,8 +310,10 @@ function installPageMenu() {
       typeof message === "object" &&
       "kind" in message &&
       message.kind === "input-menu:refresh"
-    )
+    ) {
       close();
+      if ("rediscover" in message && message.rediscover === true) discover();
+    }
   });
   const eligible = (input: HTMLInputElement) =>
     writable(input) && otpScore(input) > 0;

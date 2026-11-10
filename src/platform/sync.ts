@@ -1,5 +1,6 @@
 import {
   InputError,
+  identity,
   mergeRecords,
   validateCredential,
   type Credential,
@@ -100,7 +101,24 @@ export async function synchronize(
     if (item.id !== id) throw new InputError("invalid");
     decoded[id] = item;
   }
-  const merged = mergeRecords(space.records, decoded);
+  let local = space.records;
+  if (existing) {
+    // Joining also reconciles older backups that did not retain stable IDs.
+    local = { ...local };
+    const remoteIdentities = new Map(
+      Object.values(decoded)
+        .filter((item) => !item.removed)
+        .map((item) => [identity(item), item.id]),
+    );
+    for (const item of Object.values(local)) {
+      const id = remoteIdentities.get(identity(item));
+      if (!item.removed && id && !decoded[item.id] && !local[id]) {
+        delete local[item.id];
+        local[id] = { ...item, id };
+      }
+    }
+  }
+  const merged = mergeRecords(local, decoded);
   const updates: Record<string, Sealed> = {};
   const markerName = prefix + "hello";
   if (!remote[markerName])
@@ -143,12 +161,11 @@ export async function synchronize(
     );
   }
   let position =
-    Math.max(0, ...Object.values(space.records).map((item) => item.position)) +
-    1;
+    Math.max(0, ...Object.values(local).map((item) => item.position)) + 1;
   space.records = Object.fromEntries(
     Object.entries(merged).map(([id, item]) => [
       id,
-      { ...item, position: space.records[id]?.position ?? position++ },
+      { ...item, position: local[id]?.position ?? position++ },
     ]),
   );
 }

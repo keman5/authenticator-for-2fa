@@ -70,6 +70,7 @@ export async function parseTransfer(text: string): Promise<Credential[]> {
     throw new InputError("invalid");
   const clean = text.trim();
   let candidates: Credential[];
+  let nativeBackup = false;
   if (clean.startsWith("{") || clean.startsWith("[")) {
     let parsed: unknown;
     try {
@@ -78,6 +79,7 @@ export async function parseTransfer(text: string): Promise<Credential[]> {
       throw new InputError("invalid");
     }
     const object = parsed as Record<string, unknown> | null;
+    nativeBackup = object?.app === "2fa-authenticator" && object.version === 1;
     const items = Array.isArray(parsed)
       ? parsed
       : (object?.entries ??
@@ -119,6 +121,11 @@ export async function parseTransfer(text: string): Promise<Credential[]> {
   return Promise.all(
     candidates.map(async (item) => {
       decodeBase32(item.secret);
+      // Account edits retain their ID so restored backups can rejoin sync.
+      if (nativeBackup && item.id) {
+        if (!/^[a-f0-9]{64}$/.test(item.id)) throw new InputError("invalid");
+        return item;
+      }
       return identify(item);
     }),
   );

@@ -109,3 +109,27 @@ test("backup imports validate decrypted account schema and reject excessive KDF 
     "invalid",
   );
 });
+
+test("external account IDs are recomputed instead of replacing existing identities", async () => {
+  const account = { login: "alice", secret, id: "a".repeat(64) };
+  const [external] = await parseTransfer(
+    JSON.stringify({ accounts: [account] }),
+  );
+  expect(external!.id).not.toBe(account.id);
+});
+
+test("native backups reject malformed stable IDs and still accept older backups without IDs", async () => {
+  const account = { login: "alice", secret };
+  await expect(
+    parseTransfer(
+      JSON.stringify({
+        app: "2fa-authenticator",
+        version: 1,
+        records: [{ ...account, id: "invalid" }],
+      }),
+    ),
+  ).rejects.toThrow("invalid");
+  const legacy = await encryptedBackup({ records: [account] }, "1");
+  const accounts = await readBackupAccounts(legacy, "1");
+  expect(accounts[0]!.id).toMatch(/^[a-f0-9]{64}$/);
+});

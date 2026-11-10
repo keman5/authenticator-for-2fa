@@ -18,6 +18,9 @@ import {
 import { AuthenticatorVault } from "../src/platform/controller";
 import { installMemoryStorage } from "./helpers/storage";
 import { createBrowserSyncNetwork } from "./helpers/browserSync";
+import { createEncryptedBackupFile } from "../src/domain/portable";
+import { encryptedBackup } from "../src/domain/sealing";
+import { toCredential } from "../src/domain/view";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -139,3 +142,97 @@ test("local edits automatically synchronize while the UI subscribes, and stoppin
   await new Promise((resolve) => setTimeout(resolve, 350));
   expect(device.sync.writes).toBe(writes);
 });
+
+test("reopening and unlocking a connected vault pulls changes made while it was closed", async () => {
+  installMemoryStorage();
+  const network = createBrowserSyncNetwork();
+  network.createDevice().install();
+  const vault = new AuthenticatorVault();
+  await vault.initialize();
+  await vault.changePassword("", "1");
+  const key = recoveryKey();
+  await vault.startBrowserSync(key, false);
+  await vault.lock();
+  const remote = emptyWorkspace();
+  await connect(remote, key, true);
+  insertRecords(remote, [await credential("remote update")]);
+  await synchronize(remote);
+
+  const reopened = new AuthenticatorVault();
+  const stop = reopened.watchStorage();
+  try {
+    await reopened.initialize();
+    expect(reopened.locked).toBe(true);
+    await reopened.unlock("1");
+    // Unlocking also changes the shared workspace timestamp.
+    await reopened.initialize();
+    expect(reopened.locked).toBe(false);
+    await vi.waitFor(() =>
+      expect(reopened.accounts.map((account) => account.label)).toEqual([
+        "remote update",
+      ]),
+    );
+  } finally {
+    stop();
+  }
+});
+
+test.each(["encrypted", "json", "legacy encrypted"])(
+  "restoring an edited account from a %s backup preserves its sync identity",
+  async (format) => {
+    installMemoryStorage();
+    const network = createBrowserSyncNetwork();
+    network.createDevice().install();
+    const original = new AuthenticatorVault();
+    await original.initialize();
+    await original.addAccount({ label: "alice", secret: "JBSWY3DPEHPK3PXP" });
+    await original.updateAccount(original.accounts[0]!, {
+      label: "alice updated",
+    });
+    await original.changePassword("", "1");
+    const key = recoveryKey();
+    await original.startBrowserSync(key, false);
+    const text =
+      format === "legacy encrypted"
+        ? await encryptedBackup(
+            {
+              records: original.accounts.map((account) =>
+                toCredential(account),
+              ),
+            },
+            "backup password",
+          )
+        : format === "encrypted"
+          ? await (
+              await createEncryptedBackupFile(
+                original.accounts,
+                original.settings,
+                "backup password",
+              )
+            ).blob.text()
+          : JSON.stringify({
+              app: "2fa-authenticator",
+              version: 1,
+              accounts: original.accounts,
+            });
+
+    network.createDevice().install();
+    const restored = new AuthenticatorVault();
+    await restored.initialize();
+    if (format !== "json")
+      await restored.importEncryptedBackupText(text, "backup password");
+    else await restored.importText(text);
+    if (format !== "legacy encrypted")
+      expect(restored.accounts[0]!.id).toBe(original.accounts[0]!.id);
+    await restored.changePassword("", "1");
+    await restored.startBrowserSync(key, true);
+    expect(restored.syncStatus).toBe("ready");
+    expect(restored.accounts[0]!.id).toBe(original.accounts[0]!.id);
+    expect(restored.accounts.map((account) => account.label)).toEqual([
+      "alice updated",
+    ]);
+    const remote = emptyWorkspace();
+    await connect(remote, key, true);
+    expect(activeRecords(remote)).toHaveLength(1);
+  },
+);
