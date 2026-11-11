@@ -15,6 +15,7 @@ import { useAutoLock } from '../../src/app/useAutoLock';
 import { VaultProvider } from '../../src/app/vault';
 import * as appWindow from '../../src/platform/windows';
 import * as qrDecoder from '../../src/domain/image';
+import * as qrFiles from '../../src/domain/qr';
 import App from '../../src/app/App';
 import { Scanner } from '../../src/features/import-export/Scanner';
 import { MemoryStorage, installStructuredCloneChromeStorage } from '../helpers/storage';
@@ -110,6 +111,43 @@ test('a camera permission result arriving after navigation releases every acquir
   });
   expect(stop).toHaveBeenCalledOnce();
 });
+
+test.each(['switch mode', 'leave page'])(
+  'a QR image decoded after %s does not import accounts',
+  async (cancel) => {
+    installStructuredCloneChromeStorage();
+    const vault = new AuthenticatorVault();
+    await vault.initialize();
+    let resolve!: (texts: string[]) => void;
+    const pending = new Promise<string[]>((done) => {
+      resolve = done;
+    });
+    vi.spyOn(qrFiles, 'decodeQrFiles').mockReturnValue(pending);
+    const importText = vi.spyOn(vault, 'importText');
+    const imported = vi.fn();
+    const view = render(
+      <VaultProvider vault={vault}>
+        <Scanner onImported={imported} onPageScan={async () => {}} />
+      </VaultProvider>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Upload file' }));
+    fireEvent.change(view.container.querySelector('input[type=file]')!, {
+      target: { files: [new File(['qr'], 'account.png', { type: 'image/png' })] }
+    });
+    expect(screen.getByRole('status')).toBeTruthy();
+    if (cancel === 'switch mode')
+      fireEvent.click(screen.getByRole('button', { name: 'Screenshot' }));
+    else view.unmount();
+    await act(async () => {
+      resolve(['otpauth://totp/Late?secret=JBSWY3DPEHPK3PXP']);
+      await pending;
+    });
+    expect(importText).not.toHaveBeenCalled();
+    expect(vault.accounts).toHaveLength(0);
+    expect(imported).not.toHaveBeenCalled();
+    expect(screen.queryByRole('status')).toBeNull();
+  }
+);
 
 test('closing every page does not reset the persisted inactivity deadline on reopen', async () => {
   const vault = await vaultWithProtection(1);

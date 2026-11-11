@@ -157,20 +157,23 @@ export function Scanner({
     );
   }
   async function files(files: File[]) {
+    const current = ++generation.current;
     setBusy(true);
     setStatus('');
     vault.notice = '';
     setError('');
     setCameraFailure(null);
     try {
-      await importDecoded((await decodeQrFiles(files)).join('\n'));
+      const decoded = await decodeQrFiles(files);
+      if (!mounted.current || generation.current !== current) return;
+      await importDecoded(decoded.join('\n'));
     } catch (error) {
-      if (mounted.current)
+      if (mounted.current && generation.current === current)
         setError(
           localizeQrError(getErrorMessage(error, tr('importFailed')), tr)
         );
     } finally {
-      if (mounted.current) setBusy(false);
+      if (mounted.current && generation.current === current) setBusy(false);
     }
   }
   async function decodeFrame(element: HTMLVideoElement) {

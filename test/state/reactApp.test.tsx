@@ -52,6 +52,36 @@ test("bottom navigation resets content scroll including the current tab", async 
   }
 });
 
+test("password save blocks a second submission while the first change is pending", async () => {
+  const user = userEvent.setup();
+  const vault = await openApp();
+  await user.click(screen.getByRole("button", { name: "Settings" }));
+  await user.click(screen.getByRole("button", { name: /UI password/ }));
+  await user.type(screen.getByLabelText("New password"), "1");
+  await user.type(screen.getByLabelText("Confirm password"), "1");
+  let finish!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const change = vi.spyOn(vault, "changePassword").mockReturnValue(pending);
+  const form = screen.getByLabelText("New password").closest("form")!;
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  try {
+    expect(change).toHaveBeenCalledExactlyOnceWith("", "1");
+    expect(
+      screen.getByRole("button", { name: "Save password" }).hasAttribute("disabled"),
+    ).toBe(true);
+  } finally {
+    await act(async () => {
+      finish();
+      await pending;
+    });
+    change.mockRestore();
+  }
+  expect(screen.queryByLabelText("New password")).toBeNull();
+});
+
 test("manual create, favorite, copy and reopening use the same persisted real vault", async () => {
   const user = userEvent.setup();
   const vault = await openApp();
@@ -596,9 +626,9 @@ test("page-scan retains the scanner, shows progress and a persistent result, and
 });
 
 test.each([
-  ["MacIntel", "⌘⇧2"],
-  ["Win32", "Ctrl+Shift+2"],
-  ["Linux x86_64", "Ctrl+Shift+2"],
+  ["MacIntel", "⌘ + Shift + 2"],
+  ["Win32", "Ctrl + Shift + 2"],
+  ["Linux x86_64", "Ctrl + Shift + 2"],
 ])(
   "shortcut modifiers follow the current platform: %s",
   async (platform, shortcut) => {
@@ -614,7 +644,7 @@ test.each([
       await user.click(
         screen.getByRole("button", { name: /Passkey & shortcuts/ }),
       );
-      expect(screen.getByText(shortcut)).toBeTruthy();
+      expect(screen.getByText(shortcut).tagName).toBe("KBD");
       expect(screen.queryByText("⌘ / Ctrl + Shift + 2")).toBeNull();
     } finally {
       if (original) Object.defineProperty(navigator, "platform", original);

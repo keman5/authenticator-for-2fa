@@ -337,22 +337,29 @@ export function PasswordView({ onBack }: { onBack: () => void }) {
     [password, setPassword] = useState(""),
     [confirm, setConfirm] = useState(""),
     [error, setError] = useState(""),
+    [saving, setSaving] = useState(false),
     [removing, setRemoving] = useState(false);
   async function save() {
+    if (saving || vault.busy) return;
     setError("");
     if (password !== confirm) {
       setError(tr("passwordMismatch"));
       return;
     }
-    await vault.changePassword(current, password);
-    if (vault.error) {
-      setError(vault.error);
-      vault.error = "";
-    } else {
-      setCurrent("");
-      setPassword("");
-      setConfirm("");
-      onBack();
+    setSaving(true);
+    try {
+      await vault.changePassword(current, password);
+      if (vault.error) {
+        setError(vault.error);
+        vault.error = "";
+      } else {
+        setCurrent("");
+        setPassword("");
+        setConfirm("");
+        onBack();
+      }
+    } finally {
+      setSaving(false);
     }
   }
   return (
@@ -394,7 +401,7 @@ export function PasswordView({ onBack }: { onBack: () => void }) {
           <button
             className="btn btn-primary"
             type="submit"
-            disabled={vault.busy || password.length < 1}
+            disabled={saving || vault.busy || password.length < 1}
           >
             {ui("savePwd")}
           </button>
@@ -402,7 +409,7 @@ export function PasswordView({ onBack }: { onBack: () => void }) {
             <button
               className="btn btn-danger-soft"
               type="button"
-              disabled={vault.busy || vault.syncEnabled}
+              disabled={saving || vault.busy || vault.syncEnabled}
               onClick={() => {
                 setError("");
                 setRemoving(true);
@@ -535,9 +542,11 @@ export function PasskeyView({
             <b>{ui("openWindow")}</b>
             <small>{ui("shortcutsNote")}</small>
           </span>
-          <span className="row-val">
-            {/Mac/i.test(navigator.platform) ? "⌘⇧2" : "Ctrl+Shift+2"}
-          </span>
+          <kbd className="row-val kbd kbd-sm">
+            {/Mac/i.test(navigator.platform)
+              ? "⌘ + Shift + 2"
+              : "Ctrl + Shift + 2"}
+          </kbd>
         </div>
       </div>
       {typeof chrome !== "undefined" &&

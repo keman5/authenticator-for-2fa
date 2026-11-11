@@ -9,7 +9,7 @@ const browser =
   "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge";
 const profile = await mkdtemp(join(tmpdir(), "authenticator-ui-"));
 let child = launch();
-function launch() {
+function launch(url = "about:blank") {
   return spawn(
     browser,
     [
@@ -20,7 +20,7 @@ function launch() {
       "--no-default-browser-check",
       `--disable-extensions-except=${resolve("dist/edge")}`,
       `--load-extension=${resolve("dist/edge")}`,
-      "about:blank",
+      url,
     ],
     { stdio: "ignore" },
   );
@@ -143,7 +143,7 @@ const metrics = (height) =>
     deviceScaleFactor: 1,
     mobile: false,
   });
-async function restart() {
+async function restart(url = root + "/index.html") {
   page?.close();
   worker?.close();
   page = worker = undefined;
@@ -151,11 +151,37 @@ async function restart() {
   child.kill("SIGTERM");
   await exited;
   await rm(join(profile, "DevToolsActivePort"), { force: true });
-  child = launch();
+  child = launch(url);
   await attach();
+  const target = await until(
+    async () =>
+      (await fetch(endpoint + "/json/list").then((r) => r.json())).find(
+        (t) => t.type === "page" && t.url === url,
+      ),
+    "reopened extension",
+  );
+  page = new CDP(target.webSocketDebuggerUrl);
+  await page.call("Page.enable");
+  await page.call("Page.navigate", { url });
 }
 try {
   await attach();
+  // Edge requires developer mode to keep unpacked extensions enabled on restart.
+  const settings = await open("chrome://extensions/");
+  try {
+    await until(
+      () => settings.evaluate(
+        "typeof chrome.developerPrivate?.updateProfileConfiguration === 'function'",
+      ),
+      "extension developer settings",
+    );
+    await settings.evaluate(
+      "new Promise((resolve,reject)=>chrome.developerPrivate.updateProfileConfiguration({inDeveloperMode:true},()=>chrome.runtime.lastError?reject(Error(chrome.runtime.lastError.message)):resolve()))",
+    );
+    await settings.call("Page.close");
+  } finally {
+    settings.close();
+  }
   await worker.evaluate(
     `chrome.storage.local.set({'${store}':{schema:2,records:{},preferences:{locale:'en',languageMode:'manual',theme:'light',conceal:false,seconds:true,paste:false,matchSite:false}}})`,
   );
@@ -177,8 +203,8 @@ try {
       assert.equal(bounds.height, 44);
       assert.equal(bounds.paddingTop, "6px");
       assert.equal(bounds.paddingBottom, "6px");
-      assert.equal(bounds.buttonHeight, 44);
-      assert.equal(bounds.iconHeight, 18);
+      assert.equal(bounds.buttonHeight, 32);
+      assert.equal(bounds.iconHeight, 20);
       assert.equal(bounds.bottom, height);
       assert.ok(bounds.width <= 370);
     }
@@ -320,8 +346,7 @@ try {
     "wrong password error",
   );
   assert.equal(await codes(), false);
-  await restart();
-  page = await open(root + "/index.html?entry=quick");
+  await restart(root + "/index.html?entry=quick");
   await until(locked, "legacy bypass stays locked after restart");
   await field("Password", "1");
   await click("Unlock");
@@ -355,7 +380,6 @@ try {
   await until(codes, "authenticated timed reopening");
   assert.equal((await state()).gate.unlockedAt, stamp);
   await restart();
-  page = await open();
   await until(codes, "authenticated deadline persists across browser restart");
   assert.equal((await state()).gate.unlockedAt, stamp);
   const setClock = (offset) =>
