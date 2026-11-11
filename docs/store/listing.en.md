@@ -4,7 +4,7 @@ Copy field contents, not the Markdown headings. Use only the features offered by
 
 ## Name
 
-Authenticator - 2FA
+Authenticator-For-2FA
 
 ## Short description
 
@@ -12,7 +12,7 @@ One-time codes, optional screen lock and encrypted portable backups.
 
 ## Full description — Chrome, Edge, Firefox
 
-Generate and manage two-factor verification codes in your browser with Authenticator - 2FA.
+Generate and manage two-factor verification codes in your browser with Authenticator-For-2FA.
 
 • TOTP, HOTP and Steam codes, generated on your device.
 • Add accounts manually or import OTP links, QR images, migration QR codes and supported backups.

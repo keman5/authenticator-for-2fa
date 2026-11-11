@@ -33,7 +33,7 @@ node scripts/check-input-menu.mjs
 
 These scripts use the installed Edge binary with disposable headless profiles. They do not modify normal browser profiles. `EDGE_BINARY` can select another compatible binary.
 
-The UI check exercises built resources, real PNG/WASM import, multiple viewport heights, password workflows, shortcut settings, restart persistence and fixed authentication deadlines. The input-menu check exercises actual page filling, preservation of unrelated or incompatible input values, menu cleanup and account UI behavior.
+The UI check exercises built resources, real PNG/WASM import, multiple viewport heights, password workflows, shortcut settings, restart persistence and idle lock deadlines. The input-menu check exercises actual page filling, preservation of unrelated or incompatible input values, menu cleanup and account UI behavior.
 
 For the native authentication bridge:
 

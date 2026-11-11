@@ -8,7 +8,7 @@
 
 | 字段 | 内容 |
 | --- | --- |
-| 产品名 | Authenticator - 2FA |
+| 产品名 | Authenticator-For-2FA |
 | 联系／支持／隐私邮箱 | support@macseek.cc |
 | 项目主页 | https://github.com/keman5/authenticator-for-2fa |
 | 公开问题 | https://github.com/keman5/authenticator-for-2fa/issues |

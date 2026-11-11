@@ -2,8 +2,11 @@ import { openShortcutSettings, shortcutsPage } from "../../platform/browser";
 import { LOCK_DURATIONS } from "../../domain/locking";
 import { translate as workspaceCopy } from "../../domain/workspaceCopy";
 import { needsFilePickerWindow, openAppWindow } from "../../platform/windows";
-import { requestInputMenuAccess } from "../../platform/inputMenu";
-import { useState } from "react";
+import {
+  INPUT_MENU_ORIGINS,
+  requestInputMenuAccess,
+} from "../../platform/inputMenu";
+import { useEffect, useState } from "react";
 import { useCopy, useVault } from "../../app/vault";
 import {
   Confirm,
@@ -31,6 +34,33 @@ export function SettingsView({
   const vault = useVault(),
     { ui, tr } = useCopy();
   const settings = vault.settings;
+  const [inputMenuAccess, setInputMenuAccess] = useState<boolean>();
+  useEffect(() => {
+    if (
+      typeof chrome === "undefined" ||
+      !chrome.permissions?.contains ||
+      !chrome.permissions.request
+    )
+      return;
+    let active = true;
+    const permissions = chrome.permissions;
+    const refresh = () => {
+      void permissions
+        .contains({ origins: INPUT_MENU_ORIGINS })
+        .then((allowed) => {
+          if (active) setInputMenuAccess(allowed);
+        })
+        .catch(() => {});
+    };
+    refresh();
+    permissions.onAdded?.addListener(refresh);
+    permissions.onRemoved?.addListener(refresh);
+    return () => {
+      active = false;
+      permissions.onAdded?.removeListener(refresh);
+      permissions.onRemoved?.removeListener(refresh);
+    };
+  }, []);
   const extra = (key: Parameters<typeof workspaceCopy>[1]) =>
     workspaceCopy(settings.language, key);
   function update(patch: Partial<AppSettings>) {
@@ -38,12 +68,19 @@ export function SettingsView({
       vault.error = getErrorMessage(error, tr("settingsSaveFailed"));
     });
   }
+  function grantInputMenuAccess(enable = false) {
+    void requestInputMenuAccess()
+      .then((allowed) => {
+        setInputMenuAccess(allowed);
+        if (allowed && enable) update({ enhancedInputMenu: true });
+      })
+      .catch((error) => {
+        vault.error = getErrorMessage(error, tr("settingsSaveFailed"));
+      });
+  }
   const id = typeof chrome !== "undefined" ? chrome.runtime?.id : undefined;
   return (
     <>
-      <div className="row-title">
-        <h2>{ui("settingsTitle")}</h2>
-      </div>
       <div className="section-label">{ui("generalSec")}</div>
       <div className="list-card">
         <div className="list-row">
@@ -128,19 +165,20 @@ export function SettingsView({
           checked={settings.enhancedInputMenu === true}
           onChange={(enhancedInputMenu) => {
             if (!enhancedInputMenu) update({ enhancedInputMenu: false });
-            else
-              void requestInputMenuAccess()
-                .then((allowed) => {
-                  if (allowed) update({ enhancedInputMenu: true });
-                })
-                .catch((error) => {
-                  vault.error = getErrorMessage(
-                    error,
-                    tr("settingsSaveFailed"),
-                  );
-                });
+            else grantInputMenuAccess(true);
           }}
         />
+        {settings.enhancedInputMenu && inputMenuAccess === false && (
+          <div className="list-row">
+            <button
+              className="btn btn-soft"
+              type="button"
+              onClick={() => grantInputMenuAccess()}
+            >
+              {tr("allowWebsiteAccess")}
+            </button>
+          </div>
+        )}
       </div>
       <div className="section-label">{ui("securitySec")}</div>
       <div className="list-card">
@@ -206,45 +244,52 @@ export function SettingsView({
             <b>{ui("autolockName")}</b>
             <small>{ui("autolockDesc")}</small>
           </span>
-          <Select
-            label={ui("autolockName")}
-            value={String(settings.autoLockMinutes ?? 5)}
-            options={LOCK_DURATIONS.map((seconds) => ({
-              value: String(seconds < 0 ? -1 : seconds / 60),
-              group:
-                seconds <= 0
-                  ? undefined
-                  : extra(
-                      seconds < 60
-                        ? "unitSeconds"
-                        : seconds < 3600
+          {!vault.passwordProtected ? (
+            <button
+              className="btn btn-soft"
+              type="button"
+              aria-label={ui("autolockName")}
+              onClick={() => vault.showNotice(tr("syncProtectionTitle"))}
+            >
+              {ui("chipOff")}
+            </button>
+          ) : (
+            <Select
+              label={ui("autolockName")}
+              value={String(settings.autoLockMinutes ?? 5)}
+              options={LOCK_DURATIONS.map((seconds) => ({
+                value: String(seconds < 0 ? -1 : seconds / 60),
+                group:
+                  seconds <= 0
+                    ? undefined
+                    : extra(
+                        seconds < 3600
                           ? "unitMinutes"
                           : seconds < 86400
                             ? "unitHours"
                             : "unitDays",
-                    ),
-              label:
-                seconds === 0
-                  ? ui("immediate")
-                  : seconds === -1
-                    ? ui("never")
-                    : seconds < 60
-                      ? `${seconds} ${extra("unitSeconds")}`
+                      ),
+                label:
+                  seconds === 0
+                    ? ui("immediate")
+                    : seconds === -1
+                      ? ui("never")
                       : seconds < 3600
                         ? ui("minutesN", { n: seconds / 60 })
                         : seconds < 86400
                           ? `${seconds / 3600} ${extra("unitHours")}`
                           : `${seconds / 86400} ${extra("unitDays")}`,
-            }))}
-            onChange={(value) => update({ autoLockMinutes: Number(value) })}
-          />
+              }))}
+              onChange={(value) => update({ autoLockMinutes: Number(value) })}
+            />
+          )}
         </div>
       </div>
       <div className="section-label">{ui("aboutSec")}</div>
       <div className="list-card">
         <div className="list-row">
           <span className="tx">
-            <b>Authenticator - 2FA</b>
+            <b>Authenticator-For-2FA</b>
             <small>{packageJson.version}</small>
           </span>
         </div>

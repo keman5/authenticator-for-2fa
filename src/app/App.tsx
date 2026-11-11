@@ -85,6 +85,8 @@ function parseContext(value: unknown): PageContext | null {
   const hostname = value.hostname;
   if (hostname.length < 1 || hostname.length > 253) return null;
   const result: PageContext = { hostname };
+  if ('faviconReady' in value && value.faviconReady === true)
+    result.faviconReady = true;
   if ('title' in value && typeof value.title === 'string')
     result.title = value.title.substring(0, 512);
   return result;
@@ -254,7 +256,9 @@ function Application() {
     document.documentElement.dataset.theme = theme;
     document.body.dataset.theme = theme;
   }, [theme]);
+  const initialUnlock = useRef(true);
   useEffect(() => {
+    if (!vault.locked) initialUnlock.current = false;
     if (vault.locked) {
       setCelebration(0);
       setView('codes');
@@ -399,7 +403,7 @@ function Application() {
           />
         </div>
         <span className="brand-name" dir="ltr">
-          Authenticator - 2FA
+          Authenticator-For-2FA
         </span>
         <button
           className="icon-btn"
@@ -449,7 +453,7 @@ function Application() {
       <main ref={body} className="p-body" inert={vault.locked || undefined}>
         {vault.locked ? null : !vault.initialized || !contextReady ? (
           <div className="empty visible" role="status">
-            Authenticator - 2FA
+            Authenticator-For-2FA
           </div>
         ) : (
           <div className="view active" key={view}>
@@ -457,6 +461,7 @@ function Application() {
               <AccountList
                 query={query}
                 context={context}
+                source={browserWindow.current}
                 revealedAccountIds={scannedAccountIds}
                 onEdit={(account) => {
                   setEditing(account);
@@ -582,7 +587,10 @@ function Application() {
       {vault.locked && (
         <LockScreen
           ready={contextReady}
-          requestPasskey={pendingRoute.current === 'unlock-passkey'}
+          requestPasskey={
+            pendingRoute.current === 'unlock-passkey' ||
+            (initialUnlock.current && vault.settings.passkeyDefault === true)
+          }
           onUnlocked={() => {
             setContextReady(false);
             void refreshContext().finally(() => setContextReady(true));
@@ -655,6 +663,7 @@ function LockScreen({
   useEffect(() => {
     if (
       attemptedPasskey.current ||
+      !requestPasskey ||
       !ready ||
       vault.locking ||
       vault.busy ||
@@ -663,7 +672,6 @@ function LockScreen({
       !vault.passkeyRegistered
     )
       return;
-    if (!vault.settings.passkeyDefault && !requestPasskey) return;
     attemptedPasskey.current = true;
     void unlockPasskey();
   }, [
@@ -674,7 +682,6 @@ function LockScreen({
     vault.busy,
     vault.initialized,
     vault.locked,
-    vault.settings.passkeyDefault,
     unlockPasskey
   ]);
   async function unlock() {
@@ -688,7 +695,7 @@ function LockScreen({
         <div className="lock-emblem">
           <Logo size={52} />
         </div>
-        <h2>{ui('locked')}</h2>
+        <h2 className="sr-only">{ui('locked')}</h2>
         <p>{tr('unlockTitle')}</p>
         <form
           className="lock-form"

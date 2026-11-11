@@ -1,6 +1,6 @@
 # Architecture
 
-Authenticator - 2FA is a React browser extension. It generates TOTP, HOTP and Steam codes locally, decodes QR images using bundled WebAssembly, and stores plain structured-clone-safe records in extension storage.
+Authenticator-For-2FA is a React browser extension. It generates TOTP, HOTP and Steam codes locally, decodes QR images using bundled WebAssembly, and stores plain structured-clone-safe records in extension storage.
 
 ## Modules
 
@@ -20,7 +20,7 @@ The workspace contains account records, local preferences, optional screen-lock 
 
 Password protection is optional and disabled initially. A screen password protects access to the interface; it does not encrypt local account secrets or the local sync recovery key. Passkeys and Touch ID can authorize access to the same interface. Password-protected exports and cloud copies are encrypted separately.
 
-Successful authentication starts a fixed access deadline. Reopening a panel or restarting the browser does not extend it. Explicit locking invalidates access, including permanent access. Late authentication results cannot reopen a manually locked panel. Sensitive account controls unmount while locked.
+Successful authentication starts the idle timer. Activity in an unlocked panel resets it; reopening a panel or restarting the browser does not. Automatic passkey requests are limited to the initial unlock screen of a panel. Explicit locking invalidates access, including permanent access. Late authentication results cannot reopen a manually locked panel. Sensitive account controls unmount while locked.
 
 Portable backups contain account data and omit screen passwords, passkey enrollment and sync credentials. JSON, otpauth links, migration QR codes and supported password-protected envelopes can be imported. Validate the imported codes before relying on a new installation.
 

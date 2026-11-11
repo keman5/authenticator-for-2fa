@@ -72,6 +72,7 @@ export function emptyWorkspace(): Workspace {
       seconds: true,
       paste: false,
       matchSite: false,
+      inputMenu: true,
     },
   };
 }

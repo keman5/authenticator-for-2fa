@@ -48,12 +48,12 @@ body {
 html.toolbar-popup {
   width: 370px;
   max-width: 100%;
-  height: 600px;
+  height: 755px;
 }
 /* Firefox's first popup measurement is intrinsic; later resizes follow the host. */
 html.toolbar-popup body {
   width: 370px;
-  height: 600px;
+  height: 755px;
 }
 html.toolbar-popup-sized {
   height: 100dvh;
@@ -64,7 +64,7 @@ html.toolbar-popup-sized body {
   height: 100dvh;
 }
 html.toolbar-popup .pui {
-  height: min(600px, 100dvh);
+  height: min(755px, 100dvh);
   max-width: none;
 }
 html.toolbar-popup-sized .pui,
@@ -89,6 +89,7 @@ html.camera-window .pui {
   --red: var(--color-error);
   --red-soft: color-mix(in srgb, var(--red) 9%, var(--surface));
   --amber: var(--color-warning);
+  --favorite: #d97706;
   --amber-soft: color-mix(in srgb, var(--amber) 10%, var(--surface));
   --shadow:
     0 12px 40px color-mix(in srgb, #111827 15%, transparent),
@@ -312,26 +313,6 @@ html.camera-window .pui {
     opacity: 1;
   }
 }
-.pui .row-title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 10px;
-  margin: 0 0 18px;
-}
-.pui .row-title h2 {
-  font-size: 1.625rem;
-  line-height: 1.15;
-  font-weight: 700;
-  letter-spacing: -0.045em;
-}
-.pui .row-title .count {
-  color: var(--ink3);
-  font-size: 0.75rem;
-}
-.pui .row-title .count:last-child {
-  flex: 1 0 100%;
-}
 .pui .section-label {
   font-size: 0.6875rem;
   line-height: 1.4;
@@ -341,7 +322,7 @@ html.camera-window .pui {
   text-transform: uppercase;
   margin: 24px 4px 9px;
 }
-.pui .row-title + .section-label {
+.pui .view > .section-label:first-child {
   margin-top: 0;
 }
 .pui .desc {
@@ -360,14 +341,7 @@ html.camera-window .pui {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: -4px 0 20px;
-}
-.pui .detail-head h2 {
-  font-size: 1.375rem;
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  min-width: 0;
+  margin: -8px 0 8px;
 }
 .pui .back-btn {
   display: grid;
@@ -426,37 +400,11 @@ html.camera-window .pui {
 }
 
 /* Codes are the primary content, with controls kept in a quieter rail. */
-.pui .account-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.pui .account-heading h2 {
-  font-size: 1.625rem;
-  line-height: 1.15;
-  letter-spacing: -0.045em;
-  font-weight: 700;
-}
-.pui .account-count {
-  display: grid;
-  place-items: center;
-  min-width: 27px;
-  height: 27px;
-  padding: 0 7px;
-  border-radius: 9px;
-  font-size: 0.75rem;
-  font-weight: 650;
-  background: var(--surface);
-  color: var(--ink2);
-  box-shadow: var(--card-shadow);
-  font-variant-numeric: tabular-nums;
-}
 .pui .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .pui .chip {
   min-height: 30px;
@@ -487,7 +435,7 @@ html.camera-window .pui {
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--ink3);
-  margin: 20px 3px 8px;
+  margin: 14px 3px 6px;
   overflow-wrap: anywhere;
 }
 .pui .site-dot {
@@ -498,7 +446,7 @@ html.camera-window .pui {
   flex: none;
 }
 .pui .fav-dot {
-  color: var(--amber);
+  color: var(--favorite);
   display: grid;
   place-items: center;
 }
@@ -507,10 +455,10 @@ html.camera-window .pui {
   flex-direction: row;
   align-items: flex-start;
   gap: 11px;
-  padding: 16px 12px;
-  margin-bottom: 10px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
   border: 1px solid transparent;
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--surface);
   box-shadow: var(--card-shadow);
   position: relative;
@@ -525,8 +473,9 @@ html.camera-window .pui {
 }
 .pui .avatar {
   flex: none;
-  width: 34px;
-  height: 34px;
+  align-self: center;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   border-radius: 11px;
@@ -576,7 +525,7 @@ html.camera-window .pui {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin-top: 10px;
+  margin-top: 3px;
 }
 .pui .code {
   font:
@@ -612,7 +561,7 @@ html.camera-window .pui {
   flex-direction: column;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 5px;
   align-self: stretch;
 }
 .pui .account-tools {
@@ -1473,13 +1422,6 @@ html.camera-window .pui {
 }
 .pui .lock-emblem svg {
   overflow: visible;
-}
-.pui .lock-screen h2 {
-  font-size: 1.625rem;
-  line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  margin-bottom: 10px;
 }
 .pui .lock-screen p {
   font-size: 0.8125rem;

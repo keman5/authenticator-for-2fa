@@ -86,6 +86,42 @@ test("UI messages reject other extensions and web-page senders", async () => {
     ).toBe(false);
   expect(chrome.scripting.executeScript).not.toHaveBeenCalled();
 });
+test("site icons are only read for the requested active site and never for private tabs", async () => {
+  const icon = "data:image/png;base64,iVBORw0KGgo=";
+  const tab = {
+    id: 1,
+    index: 0,
+    pinned: false,
+    highlighted: true,
+    active: true,
+    windowId: 2,
+    incognito: false,
+    selected: true,
+    discarded: false,
+    autoDiscardable: true,
+    groupId: -1,
+    url: "https://instagram.com/login",
+    favIconUrl: "https://instagram.com/icon.png",
+  };
+  const query = vi.fn(async () => [tab]);
+  const executeScript = vi.fn(async () => [{ frameId: 0, result: icon }]);
+  Object.assign(chrome.tabs, { query });
+  Object.assign(chrome.scripting, { executeScript });
+  const message = { kind: "site-icon", hostname: "instagram.com", source: 2 };
+  expect((await request(message, content)).ok).toBe(false);
+  expect(
+    (await request({ ...message, hostname: "example.com" })).value,
+  ).toBeNull();
+  expect((await request(message)).value).toBe(icon);
+  expect(chrome.scripting.executeScript).toHaveBeenCalledExactlyOnceWith({
+    target: { tabId: 1 },
+    func: expect.any(Function),
+    args: ["https://instagram.com", "https://instagram.com/icon.png"],
+  });
+  query.mockResolvedValue([{ ...tab, incognito: true }]);
+  expect((await request(message)).value).toBeNull();
+  expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(1);
+});
 test("locked workspaces reject fill and screen capture before injecting or reading images", async () => {
   const { transaction } = await import("../../src/platform/repository");
   const { newGate } = await import("../../src/domain/sealing");

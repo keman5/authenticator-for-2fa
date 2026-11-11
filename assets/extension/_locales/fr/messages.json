@@ -15,7 +15,7 @@
     "message": "Ouvrir la fenêtre popup"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "Codes uniques, verrouillage facultatif et sauvegardes chiffrées."
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "Ouvrir avec verrouillage"

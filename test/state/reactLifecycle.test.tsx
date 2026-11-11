@@ -45,22 +45,24 @@ function useObservedAutoLock(vault: AuthenticatorVault) {
   useSyncExternalStore(vault.subscribe, vault.getSnapshot);
   useAutoLock(vault);
 }
-test('the authenticated deadline locks the screen and clears visible accounts and codes', async () => {
+test('a held pointer prevents locking, then the idle deadline clears accounts and codes', async () => {
   const vault = await vaultWithProtection(1);
   vi.useFakeTimers();
   renderHook(() => useObservedAutoLock(vault));
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(59000);
-  });
+  const advance = (ms: number) => act(() => vi.advanceTimersByTimeAsync(ms));
+  await advance(59000);
+  fireEvent.pointerDown(document.body);
+  await advance(61000);
   expect(vault.locked).toBe(false);
-  fireEvent.pointerDown(document);
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(59000);
-  });
-  expect(vault.locked).toBe(true);
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(1001);
-  });
+
+  fireEvent.pointerUp(document.body);
+  await advance(59000);
+  expect(vault.locked).toBe(false);
+  fireEvent.keyDown(document.body, { key: 'Tab' });
+  await advance(59000);
+  expect(vault.locked).toBe(false);
+
+  await advance(1000);
   expect(vault.locked).toBe(true);
   expect(vault.accounts).toEqual([]);
   expect(vault.codes).toEqual({});
@@ -133,15 +135,25 @@ test('never retains an unlocked session after all pages close and reopen', async
   expect(reopened.accounts).toHaveLength(1);
 });
 
-test('activity in another page does not extend the persisted authentication deadline', async () => {
-  const idle=await vaultWithProtection(1);
-  vi.useFakeTimers();renderHook(()=>useObservedAutoLock(idle));
-  await act(()=>vi.advanceTimersByTimeAsync(59000));
-  const active=new AuthenticatorVault();await active.initialize();
+test('activity extends the shared deadline without reopening an expired session', async () => {
+  const idle = await vaultWithProtection(1);
+  vi.useFakeTimers();
+  renderHook(() => useObservedAutoLock(idle));
+  await act(() => vi.advanceTimersByTimeAsync(59000));
+  const active = new AuthenticatorVault();
+  await active.initialize();
   await active.recordActivity();
-  await act(()=>vi.advanceTimersByTimeAsync(1001));
+  await act(() => vi.advanceTimersByTimeAsync(1000));
+  expect(idle.locked).toBe(false);
+
+  const reopened = new AuthenticatorVault();
+  await reopened.initialize();
+  expect(reopened.locked).toBe(false);
+  await act(() => vi.advanceTimersByTimeAsync(60000));
   expect(idle.locked).toBe(true);
-  const reopened=new AuthenticatorVault();await reopened.initialize();expect(reopened.locked).toBe(true);
+  await active.recordActivity();
+  await reopened.checkAutoLock();
+  expect(reopened.locked).toBe(true);
 });
 
 test('a workspace without an authenticated timestamp stays locked after reopening', async () => {

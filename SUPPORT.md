@@ -1,4 +1,4 @@
-# Support — Authenticator - 2FA
+# Support — Authenticator-For-2FA
 
 Email: **support@macseek.cc**
 Public issue tracker: <https://github.com/keman5/authenticator-for-2fa/issues>

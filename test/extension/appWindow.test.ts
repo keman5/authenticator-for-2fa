@@ -294,7 +294,7 @@ test.each([
       left: 1100 - width,
       top: 165,
       width,
-      height: 680,
+      height: 755,
       type: 'popup'
     });
   }

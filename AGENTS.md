@@ -1,11 +1,11 @@
 # AGENTS.md
 
-Guidance for code agents working on Authenticator - 2FA.
+Guidance for code agents working on Authenticator-For-2FA.
 
 ## Project Context
 
 - This is a browser extension built with React 19, TypeScript, Vite, Tailwind CSS, and daisyUI.
-- Product name: `Authenticator - 2FA`.
+- Product name: `Authenticator-For-2FA`.
 - Extension `short_name`: must stay within the package limit of 12 characters per locale.
 - Homepage metadata: `https://github.com/keman5/authenticator-for-2fa`.
 
@@ -41,7 +41,7 @@ Guidance for code agents working on Authenticator - 2FA.
 - Runtime translations live in `src/lib/i18n/messages.ts`.
 - Manifest translations live in `assets/extension/_locales/*/messages.json`.
 - Every supported runtime language should have every `MessageKey`.
-- Keep `appName` as `Authenticator - 2FA`. Keep manifest short names search-relevant and within the 12-character package limit.
+- Keep `appName` as `Authenticator-For-2FA`. Keep manifest short names search-relevant and within the 12-character package limit.
 
 ## Storage And Serialization
 

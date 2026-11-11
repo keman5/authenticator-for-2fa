@@ -136,7 +136,7 @@ export function ImportExportView({
         });
       } else if (format === 'json')
         downloadFile({
-          filename: 'authenticator-2fa-backup.json',
+          filename: 'authenticator-for-2fa-backup.json',
           blob: new Blob(
             [
               JSON.stringify(
@@ -166,10 +166,6 @@ export function ImportExportView({
   }
   return (
     <>
-      <div className="row-title">
-        <h2>{ui('dataTitle')}</h2>
-        <span className="count">{ui('dataSub')}</span>
-      </div>
       <div className="section-label">{ui('importSec')}</div>
       <section className="import-panel" aria-label={ui('importSec')}>
         <Segmented
@@ -230,7 +226,7 @@ export function ImportExportView({
           </>
         )}
         {pending[0] && (
-          <div className="how-card">
+          <div>
             {importMode === 'file' && (
               <Password
                 label={ui('importPwdLabel')}
@@ -238,7 +234,7 @@ export function ImportExportView({
                 onChange={setPassword}
               />
             )}
-            <p className="desc">
+            <p className="desc" style={{ marginBlock: 10 }}>
               {tr('importEncryptedPrompt')} · {pending[0].name}
             </p>
             <div className="btn-row">

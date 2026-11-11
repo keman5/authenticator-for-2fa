@@ -15,7 +15,7 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <plist version="1.0"><dict>
 <key>CFBundleIdentifier</key><string>local.Authenticator-Workspace.TouchID</string>
 <key>CFBundleName</key><string>Authenticator Touch ID</string>
-<key>CFBundleDisplayName</key><string>Authenticator - 2FA</string>
+<key>CFBundleDisplayName</key><string>Authenticator-For-2FA</string>
 <key>CFBundleExecutable</key><string>AuthenticatorTouchID</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>

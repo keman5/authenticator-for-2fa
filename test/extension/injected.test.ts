@@ -508,7 +508,7 @@ test.each([false, true])(
       return Promise.resolve();
     }) as typeof chrome.runtime.sendMessage);
     for (const listener of listeners) listener({ kind: "scan" }, {}, () => {});
-    const cover = document.getElementById("authenticator-2fa-selection")!;
+    const cover = document.getElementById("authenticator-for-2fa-selection")!;
     cover.setPointerCapture = vi.fn();
     cover.onpointerdown!({
       clientX: 100,
@@ -530,6 +530,6 @@ test.each([false, true])(
       expect(capture.height).toBe(120);
       expect(capture.focus).toBeUndefined();
     } else expect(capture.focus).toEqual({ x: 100, y: 100 });
-    expect(document.getElementById("authenticator-2fa-selection")).toBeNull();
+    expect(document.getElementById("authenticator-for-2fa-selection")).toBeNull();
   },
 );

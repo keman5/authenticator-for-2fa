@@ -12,8 +12,9 @@ const english = {
   timeCalibrated: "Applied correction: {seconds} seconds.",
   timeCalibrationFailed: "Could not calibrate time. Check your connection and retry.",
   timeCalibrationPermission: "Allow permission to connect to Google, then retry.",
+  allowWebsiteAccess: 'Allow website access',
   warning: 'Warning',
-  appName: 'Authenticator - 2FA',
+  appName: 'Authenticator-For-2FA',
   tagline: 'Encrypted 2FA codes for secure sign-ins.',
   setupTitle: 'Set password',
   unlockTitle: 'Unlock vault',
@@ -125,7 +126,7 @@ const english = {
   passkey: 'Passkey',
   passkeyAccountName: "Local authenticator",
   passkeyDefault: "Use passkey by default",
-  passkeyDefaultHint: "Automatically request your passkey when the unlock screen opens.",
+  passkeyDefaultHint: "Automatically request your passkey when you open the extension while it is locked.",
   passkeyFailed:
     'Passkey verification failed or is unavailable. Unlock with your password and register the passkey again.',
   passkeyDeleteConfirm:
@@ -288,6 +289,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Corrección aplicada: {seconds} segundos.",
     timeCalibrationFailed: "No se pudo calibrar la hora. Comprueba la conexión e inténtalo de nuevo.",
     timeCalibrationPermission: "Permite la conexión con Google e inténtalo de nuevo.",
+    allowWebsiteAccess: 'Permitir el acceso a sitios web',
     warning: 'Advertencia',
     appName: 'Autenticador - 2FA',
     tagline: 'Códigos 2FA cifrados para inicios de sesión seguros.',
@@ -403,7 +405,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Clave de acceso',
     passkeyAccountName: "Autenticador local",
     passkeyDefault: "Usar clave de acceso por defecto",
-    passkeyDefaultHint: "Solicitar automáticamente la clave de acceso al abrir la pantalla de desbloqueo.",
+    passkeyDefaultHint: "Solicitar automáticamente la clave de acceso al abrir la extensión bloqueada.",
     passkeyFailed:
       'La verificación con passkey falló o no está disponible. Desbloquea con tu contraseña y vuelve a registrarla.',
     passkeyDeleteConfirm:
@@ -564,6 +566,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "लागू समय सुधार: {seconds} सेकंड।",
     timeCalibrationFailed: "समय नहीं मिल सका। कनेक्शन जाँचें और फिर प्रयास करें।",
     timeCalibrationPermission: "Google से जुड़ने की अनुमति दें और फिर प्रयास करें।",
+    allowWebsiteAccess: 'वेबसाइटों का ऐक्सेस दें',
     warning: 'चेतावनी',
     appName: 'प्रमाणक - 2FA',
     tagline: 'सुरक्षित साइन-इन के लिए एन्क्रिप्टेड 2FA कोड।',
@@ -674,7 +677,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'पासकी',
     passkeyAccountName: "स्थानीय प्रमाणक",
     passkeyDefault: "डिफ़ॉल्ट रूप से पासकी इस्तेमाल करें",
-    passkeyDefaultHint: "अनलॉक स्क्रीन खुलने पर पासकी का अनुरोध अपने आप करें।",
+    passkeyDefaultHint: "लॉक किया हुआ एक्सटेंशन खोलने पर पासकी का अनुरोध अपने आप करें।",
     passkeyFailed:
       'पासकी सत्यापन विफल या अनुपलब्ध है। पासवर्ड से अनलॉक करके पासकी फिर पंजीकृत करें।',
     passkeyDeleteConfirm:
@@ -828,6 +831,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "التصحيح المطبق: {seconds} ثانية.",
     timeCalibrationFailed: "تعذرت معايرة الوقت. تحقق من الاتصال وأعد المحاولة.",
     timeCalibrationPermission: "اسمح بالاتصال بـ Google ثم أعد المحاولة.",
+    allowWebsiteAccess: 'السماح بالوصول إلى المواقع',
     warning: 'تحذير',
     appName: 'المصادِق - 2FA',
     tagline: 'رموز 2FA مشفرة لتسجيل الدخول الآمن.',
@@ -937,7 +941,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'مفتاح المرور',
     passkeyAccountName: "أداة المصادقة المحلية",
     passkeyDefault: "استخدام مفتاح المرور افتراضيًا",
-    passkeyDefaultHint: "طلب مفتاح المرور تلقائيًا عند فتح شاشة إلغاء القفل.",
+    passkeyDefaultHint: "طلب مفتاح المرور تلقائيًا عند فتح الإضافة وهي مقفلة.",
     passkeyFailed:
       'فشل التحقق بمفتاح المرور أو أنه غير متاح. افتح الخزنة بكلمة المرور ثم سجّل المفتاح مجدداً.',
     passkeyDeleteConfirm:
@@ -1087,6 +1091,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "প্রয়োগ করা সংশোধন: {seconds} সেকেন্ড।",
     timeCalibrationFailed: "সময় মেলানো যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
     timeCalibrationPermission: "Google-এ সংযোগের অনুমতি দিয়ে আবার চেষ্টা করুন।",
+    allowWebsiteAccess: 'ওয়েবসাইট অ্যাক্সেসের অনুমতি দিন',
     warning: 'সতর্কতা',
     appName: 'প্রমাণীকরণকারী - 2FA',
     tagline: 'নিরাপদ সাইন-ইনের জন্য এনক্রিপ্টেড 2FA কোড।',
@@ -1198,7 +1203,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'পাসকি',
     passkeyAccountName: "স্থানীয় প্রমাণীকরণকারী",
     passkeyDefault: "ডিফল্টভাবে পাসকি ব্যবহার করুন",
-    passkeyDefaultHint: "আনলক স্ক্রিন খুললে স্বয়ংক্রিয়ভাবে পাসকি চাইবে।",
+    passkeyDefaultHint: "লক করা এক্সটেনশন খুললে স্বয়ংক্রিয়ভাবে পাসকি চাইবে।",
     passkeyFailed:
       'পাসকি যাচাই ব্যর্থ বা অনুপলব্ধ। পাসওয়ার্ড দিয়ে আনলক করে পাসকি আবার নিবন্ধন করুন।',
     passkeyDeleteConfirm:
@@ -1354,6 +1359,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Correção aplicada: {seconds} segundos.",
     timeCalibrationFailed: "Não foi possível calibrar o horário. Verifique a conexão e tente novamente.",
     timeCalibrationPermission: "Permita a conexão com o Google e tente novamente.",
+    allowWebsiteAccess: 'Permitir acesso a sites',
     warning: 'Aviso',
     appName: 'Autenticador - 2FA',
     tagline: 'Códigos 2FA criptografados para entradas seguras.',
@@ -1469,7 +1475,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Chave de acesso',
     passkeyAccountName: "Autenticador local",
     passkeyDefault: "Usar chave de acesso por padrão",
-    passkeyDefaultHint: "Solicitar automaticamente a chave de acesso ao abrir a tela de desbloqueio.",
+    passkeyDefaultHint: "Solicitar automaticamente a chave de acesso ao abrir a extensão bloqueada.",
     passkeyFailed:
       'A verificação por passkey falhou ou está indisponível. Desbloqueie com a senha e registre a passkey novamente.',
     passkeyDeleteConfirm:
@@ -1628,6 +1634,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Применена поправка: {seconds} сек.",
     timeCalibrationFailed: "Не удалось сверить время. Проверьте подключение и повторите попытку.",
     timeCalibrationPermission: "Разрешите подключение к Google и повторите попытку.",
+    allowWebsiteAccess: 'Разрешить доступ к сайтам',
     warning: 'Предупреждение',
     appName: 'Аутентификатор - 2FA',
     tagline: 'Зашифрованные 2FA-коды для безопасного входа.',
@@ -1744,7 +1751,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Ключ доступа',
     passkeyAccountName: "Локальный аутентификатор",
     passkeyDefault: "Использовать ключ доступа по умолчанию",
-    passkeyDefaultHint: "Автоматически запрашивать ключ доступа при открытии экрана разблокировки.",
+    passkeyDefaultHint: "Автоматически запрашивать ключ доступа при открытии заблокированного расширения.",
     passkeyFailed:
       'Проверка ключа доступа не удалась или недоступна. Разблокируйте паролем и зарегистрируйте ключ заново.',
     passkeyDeleteConfirm:
@@ -1903,6 +1910,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "適用した補正：{seconds} 秒。",
     timeCalibrationFailed: "時刻を補正できませんでした。接続を確認して再試行してください。",
     timeCalibrationPermission: "Google への接続を許可して再試行してください。",
+    allowWebsiteAccess: 'ウェブサイトへのアクセスを許可',
     warning: '警告',
     appName: '認証アプリ - 2FA',
     tagline: '安全なサインインのための暗号化された2FAコード。',
@@ -2017,7 +2025,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'パスキー',
     passkeyAccountName: "ローカル認証アプリ",
     passkeyDefault: "パスキーを既定で使用",
-    passkeyDefaultHint: "ロック解除画面を開くと自動的にパスキー認証を要求します。",
+    passkeyDefaultHint: "拡張機能をロックされた状態で開くと、自動でパスキー認証を要求します。",
     passkeyFailed:
       'パスキー認証に失敗したか利用できません。パスワードで解除し、再登録してください。',
     passkeyDeleteConfirm:
@@ -2175,6 +2183,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Correction appliquée : {seconds} secondes.",
     timeCalibrationFailed: "Impossible de calibrer l’heure. Vérifiez la connexion et réessayez.",
     timeCalibrationPermission: "Autorisez la connexion à Google, puis réessayez.",
+    allowWebsiteAccess: 'Autoriser l’accès aux sites web',
     warning: 'Avertissement',
     appName: 'Authentificateur - 2FA',
     tagline: 'Codes 2FA chiffrés pour des connexions sécurisées.',
@@ -2290,7 +2299,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Clé d’accès',
     passkeyAccountName: "Authentificateur local",
     passkeyDefault: "Utiliser la clé d’accès par défaut",
-    passkeyDefaultHint: "Demander automatiquement la clé d’accès à l’ouverture de l’écran de déverrouillage.",
+    passkeyDefaultHint: "Demander automatiquement la clé d’accès à l’ouverture de l’extension verrouillée.",
     passkeyFailed:
       'La vérification par passkey a échoué ou est indisponible. Déverrouillez avec le mot de passe et réenregistrez la passkey.',
     passkeyDeleteConfirm:
@@ -2451,6 +2460,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Angewandte Korrektur: {seconds} Sekunden.",
     timeCalibrationFailed: "Zeitabgleich fehlgeschlagen. Verbindung prüfen und erneut versuchen.",
     timeCalibrationPermission: "Verbindung zu Google erlauben und erneut versuchen.",
+    allowWebsiteAccess: 'Zugriff auf Websites erlauben',
     warning: 'Warnung',
     appName: 'Authentifikator - 2FA',
     tagline: 'Verschlüsselte 2FA-Codes für sichere Anmeldungen.',
@@ -2568,7 +2578,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Passkey',
     passkeyAccountName: "Lokaler Authentifikator",
     passkeyDefault: "Passkey standardmäßig verwenden",
-    passkeyDefaultHint: "Beim Öffnen des Entsperrbildschirms automatisch den Passkey anfordern.",
+    passkeyDefaultHint: "Beim Öffnen der gesperrten Erweiterung automatisch den Passkey anfordern.",
     passkeyFailed:
       'Passkey-Prüfung fehlgeschlagen oder nicht verfügbar. Entsperre mit dem Passwort und registriere den Passkey erneut.',
     passkeyDeleteConfirm:
@@ -2729,6 +2739,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "已应用时间偏移：{seconds} 秒。",
     timeCalibrationFailed: "时间校准失败，请检查网络连接后重试。",
     timeCalibrationPermission: "请允许连接谷歌的权限后重试。",
+    allowWebsiteAccess: '允许访问网站',
     warning: '警告',
     appName: '身份验证器 - 2FA',
     tagline: '用于安全登录的加密 2FA 验证码。',
@@ -2838,7 +2849,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: '通行密钥',
     passkeyAccountName: "本地验证器",
     passkeyDefault: "默认使用通行密钥解锁",
-    passkeyDefaultHint: "打开解锁界面时自动请求通行密钥认证。",
+    passkeyDefaultHint: "扩展处于锁定状态时，打开扩展会自动请求通行密钥认证。",
     passkeyFailed: '通行密钥验证失败或不可用，请用密码解锁后重新注册通行密钥。',
     passkeyDeleteConfirm:
       '删除此设备的通行密钥解锁？密码和账号将保留，密码管理器中的通行密钥不会被删除。',
@@ -2978,8 +2989,9 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "已套用時間偏移：{seconds} 秒。",
     timeCalibrationFailed: "時間校準失敗，請檢查網路連線後重試。",
     timeCalibrationPermission: "請允許連接 Google 的權限後重試。",
+    allowWebsiteAccess: '允許存取網站',
     warning: '警告',
-    appName: 'Authenticator - 2FA',
+    appName: 'Authenticator-For-2FA',
     tagline: '用於安全登入的加密 2FA 驗證碼。',
     setupTitle: '设置密码',
     unlockTitle: '已鎖定',
@@ -3086,7 +3098,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: '通行密鑰',
     passkeyAccountName: "本機驗證器",
     passkeyDefault: "預設使用通行密鑰解鎖",
-    passkeyDefaultHint: "開啟解鎖畫面時自動要求通行密鑰驗證。",
+    passkeyDefaultHint: "擴充功能處於鎖定狀態時，開啟擴充功能會自動要求通行密鑰驗證。",
     passkeyFailed:
       '通行密鑰驗證失敗或無法使用，請用密碼解鎖後重新註冊通行密鑰。',
     passkeyDeleteConfirm:
@@ -3224,8 +3236,9 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "적용된 시간 차이: {seconds}초.",
     timeCalibrationFailed: "시간을 보정하지 못했습니다. 연결을 확인하고 다시 시도하세요.",
     timeCalibrationPermission: "Google 연결 권한을 허용한 후 다시 시도하세요.",
+    allowWebsiteAccess: '웹사이트 접근 허용',
     warning: '경고',
-    appName: 'Authenticator - 2FA',
+    appName: 'Authenticator-For-2FA',
     tagline: '안전한 로그인을 위한 암호화된 2FA 코드입니다.',
     setupTitle: '비밀번호 설정',
     unlockTitle: '잠김',
@@ -3338,7 +3351,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: '패스키',
     passkeyAccountName: "로컬 인증 앱",
     passkeyDefault: "기본적으로 패스키로 잠금 해제",
-    passkeyDefaultHint: "잠금 해제 화면을 열면 자동으로 패스키 인증을 요청합니다.",
+    passkeyDefaultHint: "잠긴 상태에서 확장 프로그램을 열면 자동으로 패스키 인증을 요청합니다.",
     passkeyFailed:
       '패스키 인증에 실패했거나 사용할 수 없습니다. 비밀번호로 잠금을 해제한 후 다시 등록하세요.',
     passkeyDeleteConfirm:
@@ -3492,8 +3505,9 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     timeCalibrated: "Uygulanan düzeltme: {seconds} saniye.",
     timeCalibrationFailed: "Saat eşitlenemedi. Bağlantınızı kontrol edip yeniden deneyin.",
     timeCalibrationPermission: "Google bağlantısına izin verip yeniden deneyin.",
+    allowWebsiteAccess: 'Web sitesi erişimine izin ver',
     warning: 'Uyarı',
-    appName: 'Authenticator - 2FA',
+    appName: 'Authenticator-For-2FA',
     tagline: 'Güvenli girişler için şifreli 2FA kodları.',
     setupTitle: 'Parola belirle',
     unlockTitle: 'Kasanın kilidini aç',
@@ -3607,7 +3621,7 @@ const dictionaries: Record<LanguageCode, Record<MessageKey, string>> = {
     passkey: 'Geçiş anahtarı',
     passkeyAccountName: "Yerel doğrulayıcı",
     passkeyDefault: "Varsayılan olarak geçiş anahtarı kullan",
-    passkeyDefaultHint: "Kilit açma ekranı açıldığında otomatik olarak geçiş anahtarı iste.",
+    passkeyDefaultHint: "Kilitli uzantıyı açarken otomatik olarak geçiş anahtarı iste.",
     passkeyFailed:
       'Geçiş anahtarı doğrulaması başarısız veya kullanılamıyor. Parolayla kilidi açın ve anahtarı yeniden kaydedin.',
     passkeyDeleteConfirm:

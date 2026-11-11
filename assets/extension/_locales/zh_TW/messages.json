@@ -15,7 +15,7 @@
     "message": "開啟彈出視窗"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "動態驗證碼、可選介面鎖與加密備份。"
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "透過介面鎖開啟"

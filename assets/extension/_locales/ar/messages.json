@@ -15,7 +15,7 @@
     "message": "فتح النافذة المنبثقة"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "رموز مؤقتة وقفل شاشة اختياري ونسخ احتياطية مشفرة."
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "فتح مع القفل"

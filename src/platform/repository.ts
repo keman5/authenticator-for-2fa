@@ -52,7 +52,8 @@ export function validateWorkspace(value: unknown): Workspace {
         languageMode: p.languageMode === "manual" ? "manual" : "system",
         sortMode: p.sortMode === "manual" ? "manual" : "contextual",
         showAll: p.showAll === true,
-        inputMenu: p.inputMenu === true,
+        inputMenu:
+          p.inputMenu === undefined ? defaults.inputMenu : p.inputMenu === true,
         passkeyDefault: p.passkeyDefault === true,
         ...(typeof p.lastBackupAt === "string"
           ? { lastBackupAt: p.lastBackupAt }
@@ -71,9 +72,10 @@ export function validateWorkspace(value: unknown): Workspace {
         fromBase64(x.gate.proof, 64).length !== 32
       )
         throw new InputError("corrupt");
+      const legacyDuration = x.gate.lockAfter === 30;
+      const lockAfter = legacyDuration ? 60 : x.gate.lockAfter;
       if (
-        (x.gate.lockAfter !== undefined &&
-          !LOCK_DURATIONS.includes(x.gate.lockAfter)) ||
+        (lockAfter !== undefined && !LOCK_DURATIONS.includes(lockAfter)) ||
         (x.gate.lockedAt !== undefined &&
           (!Number.isSafeInteger(x.gate.lockedAt) || x.gate.lockedAt <= 0)) ||
         (x.gate.unlockedAt !== undefined &&
@@ -84,11 +86,11 @@ export function validateWorkspace(value: unknown): Workspace {
         salt: x.gate.salt,
         proof: x.gate.proof,
         touchID: x.gate.touchID === true,
-        lockAfter: x.gate.lockAfter ?? 0,
+        lockAfter: lockAfter ?? 0,
         ...(Number.isSafeInteger(x.gate.lockedAt) && x.gate.lockedAt! > 0
           ? { lockedAt: x.gate.lockedAt }
           : {}),
-        ...(x.gate.unlockedAt === undefined
+        ...(legacyDuration || x.gate.unlockedAt === undefined
           ? {}
           : { unlockedAt: x.gate.unlockedAt }),
       };

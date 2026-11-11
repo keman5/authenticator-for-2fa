@@ -101,7 +101,7 @@ export function Header({
       >
         <ChevronLeft size={21} />
       </button>
-      <h2>{title}</h2>
+      <h2 className="sr-only">{title}</h2>
     </div>
   );
 }

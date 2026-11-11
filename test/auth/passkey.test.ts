@@ -100,7 +100,7 @@ test('credential account labels use the browser UI language rather than hard-cod
   const options = create.mock.calls[0]![0] as CredentialCreationOptions;
   expect(options.publicKey!.user.name).toBe('本地验证器');
   expect(options.publicKey!.user.displayName).toBe('本地验证器');
-  expect(options.publicKey!.rp.name).toBe('Authenticator - 2FA');
+  expect(options.publicKey!.rp.name).toBe('Authenticator-For-2FA');
 });
 
 

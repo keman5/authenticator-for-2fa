@@ -57,10 +57,10 @@ export function fileWindowBounds(
       ),
       top: windowTop,
       width,
-      height: Math.min(720, top + screen.availHeight - windowTop),
+      height: Math.min(755, top + screen.availHeight - windowTop),
     };
   }
-  const height = Math.min(720, screen.availHeight);
+  const height = Math.min(755, screen.availHeight);
   return {
     left: Math.round(
       Math.max(left, Math.min(x, left + screen.availWidth - width)),

@@ -1,4 +1,4 @@
-# Authenticator - 2FA
+# Authenticator-For-2FA
 
 A browser extension for generating and managing TOTP, HOTP and Steam verification codes, with account import/export, optional screen locking and encrypted browser sync.
 
@@ -11,7 +11,7 @@ A browser extension for generating and managing TOTP, HOTP and Steam verificatio
 - Optional page enhancement places its icon outside the OTP field's upper-right corner. Hover the icon for site-matched accounts; codes start masked with `*`, reveal only for the hovered or keyboard-focused row, and turn red in the final five seconds. Leaving a row masks it again. Only clicking an account fills the field.
 - Password protection is off initially. Enable a screen password in Settings; one character is sufficient. This is an **interface lock**: account secrets remain unencrypted in this extension's local storage.
 - The normal action defaults to Command+Shift+2 on macOS / Ctrl+Shift+2 elsewhere. Manage it from Settings → Passkey & shortcuts. Shortcuts follow the same screen-lock policy as clicking the extension icon.
-- Auto-lock defaults to closing the panel. Choices are filtered by seconds, minutes, hours and days, with lock-on-close and never always available. Other choices are 30 seconds, every minute from 1–10 minutes, 30 minutes, every hour from 1–24 hours, every day from 3–30 days, or forever. Successful password, passkey or Touch ID authentication starts a fresh deadline. Normal reopening and browser restart preserve access until that deadline; activity does not extend it. Explicit Lock clears the cached timestamp, including for forever. Timed panels check expiry once per second.
+- Auto-lock defaults to closing the panel. Choices are filtered by minutes, hours and days, with lock-on-close and never always available. Timed choices are every minute from 1–10 minutes, 30 minutes, every hour from 1–24 hours, and every day from 3–30 days. An existing 30-second setting switches to one minute and requires a fresh unlock. Successful password, passkey or Touch ID authentication starts a fresh deadline. Normal reopening and browser restart preserve access until that deadline. Explicit Lock clears the cached timestamp, including for forever. Timed panels check expiry once per second.
 - Optional Touch ID on supported Macs verifies a fingerprint through Apple LocalAuthentication using the local authentication companion. A configured bridge is available on the lock screen. It does not encrypt local account data.
 - Export an encrypted backup with a separate password, or an explicitly selected plaintext JSON/URI file. Backups contain accounts, not the screen password or cloud recovery key.
 - Encrypted browser sync uses a separate recovery key. Create a sync group on the first device, copy its recovery key, then join on another device using the same browser sync account. Preferences and screen passwords remain local. Local account data and the recovery key are not encrypted by the screen password. Deleting a sync group retains an authenticated deletion marker so offline devices disconnect instead of recreating it. Safari's `storage.sync` is local only, so this sync option is disabled there. Different browser vendors do not share their sync services.
@@ -38,7 +38,7 @@ For a universal macOS Safari container, install Xcode and run:
 ./build.sh safari
 ```
 
-This generates a new `Authenticator Workspace.app` with bundle identifier `local.Authenticator-Workspace`, built for arm64 and x86_64, under `dist/safari-native/Build/Products/Release/`. It is unsigned. Safari distribution requires Apple signing and the applicable distribution workflow. The extension inside retains the product name Authenticator - 2FA.
+This generates a new `Authenticator Workspace.app` with bundle identifier `local.Authenticator-Workspace`, built for arm64 and x86_64, under `dist/safari-native/Build/Products/Release/`. It is unsigned. Safari distribution requires Apple signing and the applicable distribution workflow. The extension inside retains the product name Authenticator-For-2FA.
 
 ## Touch ID on macOS
 
@@ -70,7 +70,7 @@ An optional real-extension smoke check runs Edge in a temporary headless profile
 node scripts/check-ui.mjs
 ```
 
-It uses the local Edge binary by default; set `EDGE_BINARY` to another Chromium-compatible binary if necessary. It does not open foreground windows or touch your everyday profile. It checks the React UI, real PNG QR import using the packaged WASM, layout heights, screen passwords, normal/direct entry, actual browser restarts and fixed lock deadlines. Native authentication replies are simulated; this does not test a physical fingerprint or Firefox/Safari runtime behavior.
+It uses the local Edge binary by default; set `EDGE_BINARY` to another Chromium-compatible binary if necessary. It does not open foreground windows or touch your everyday profile. It checks the React UI, real PNG QR import using the packaged WASM, layout heights, screen passwords, normal/direct entry, actual browser restarts and idle lock deadlines. Native authentication replies are simulated; this does not test a physical fingerprint or Firefox/Safari runtime behavior.
 
 ## Backup compatibility and distribution
 

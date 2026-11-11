@@ -4,7 +4,7 @@
 
 ## 名称
 
-Authenticator - 2FA
+Authenticator-For-2FA
 
 ## 简短描述
 
@@ -12,7 +12,7 @@ Authenticator - 2FA
 
 ## 完整描述 — Chrome、Edge、Firefox
 
-使用 Authenticator - 2FA，在浏览器中生成和管理双重验证所需的动态验证码。
+使用 Authenticator-For-2FA，在浏览器中生成和管理双重验证所需的动态验证码。
 
 • 在设备上生成 TOTP、HOTP 和 Steam 验证码。
 • 手动添加账户，或导入 OTP 链接、二维码图片、迁移二维码及支持的备份。

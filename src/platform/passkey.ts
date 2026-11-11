@@ -111,7 +111,7 @@ export async function enrollPasskey(
   const credential = (await navigator.credentials.create({
     publicKey: {
       challenge: crypto.getRandomValues(new Uint8Array(32)),
-      rp: { name: 'Authenticator - 2FA', ...(rpId ? { id: rpId } : {}) },
+      rp: { name: 'Authenticator-For-2FA', ...(rpId ? { id: rpId } : {}) },
       user: {
         id: crypto.getRandomValues(new Uint8Array(32)),
         name: accountName,

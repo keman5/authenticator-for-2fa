@@ -19,6 +19,7 @@ import {
 import { useCopy, useVault } from '../../app/vault';
 import {
   getAccountListView,
+  getAccountPageMatchScore,
   getAccountPageRanking,
   type PageContext
 } from '../../domain/site';
@@ -26,11 +27,18 @@ import { getErrorMessage } from '../../domain/feedback';
 import type { AuthenticatorAccount } from '../../domain/view';
 import { Confirm } from '../../shared/ui/controls';
 import { isReorderCurrent, moveItem } from './reorder';
+import { request } from '../../platform/browser';
+import {
+  isSiteIcon,
+  readSiteIcons,
+  rememberSiteIcon
+} from '../../platform/siteIcons';
 
 type Filter = 'all' | 'site' | 'fav';
 export function AccountList({
   query,
   context,
+  source,
   onEdit,
   onQr,
   onCopy,
@@ -39,6 +47,7 @@ export function AccountList({
   query: string;
   revealedAccountIds?: string[];
   context: PageContext | null;
+  source?: number;
   onEdit: (account: AuthenticatorAccount) => void;
   onQr: (accounts: AuthenticatorAccount[]) => void;
   onCopy: (code: string, fill?: boolean) => void;
@@ -62,14 +71,38 @@ export function AccountList({
     target: number;
     source: number;
   } | null>(null);
+  const sortedAccounts = useMemo(() => vault.sortedAccounts, [vault, vault.accounts]);
   const ranked = useMemo(
-    () => getAccountPageRanking(vault.sortedAccounts, context),
-    [vault.sortedAccounts, context]
+    () => getAccountPageRanking(sortedAccounts, context),
+    [sortedAccounts, context]
   );
+  const [siteIcons, setSiteIcons] = useState(readSiteIcons);
+  const hostname = context?.hostname;
+  const shouldReadIcon =
+    ranked.suggestedAccountIds.size > 0 &&
+    !siteIcons.some(([host]) => host === hostname);
+  useEffect(() => {
+    if (!hostname || !shouldReadIcon) return;
+    let active = true;
+    void request<unknown>('site-icon', { hostname, source })
+      .then((icon) => {
+        if (active && isSiteIcon(icon)) setSiteIcons(rememberSiteIcon(hostname, icon));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [hostname, context?.faviconReady, shouldReadIcon, source]);
+  const accountIcons = useMemo(() => {
+    const current = siteIcons.find(([host]) => host === hostname);
+    return new Map(sortedAccounts.map((account) => {
+      const icon = (ranked.suggestedAccountIds.has(account.id) ? current : undefined)
+        ?? siteIcons.find(([host]) => getAccountPageMatchScore(account, { hostname: host }) > 0);
+      return [account.id, icon?.[1]];
+    }));
+  }, [sortedAccounts, ranked, hostname, siteIcons]);
   const ordered =
     vault.settings.accountSortMode === 'contextual'
       ? ranked.accounts
-      : vault.sortedAccounts;
+      : sortedAccounts;
   const favoriteOrder = useMemo(
     () =>
       [...ordered].sort(
@@ -200,10 +233,6 @@ export function AccountList({
   }
   return (
     <>
-      <div className="account-heading">
-        <h2>{ui('navCodes')}</h2>
-        <span className="account-count">{vault.accounts.length}</span>
-      </div>
       <div className="chips" aria-label={tr('accounts')}>
         {(['all', 'fav', 'site'] as const).map((item) => (
           <button
@@ -224,13 +253,13 @@ export function AccountList({
                   : 'chipFav'
             )}
             {item === 'all' && <span>{vault.accounts.length}</span>}
-            {item === 'site' && context?.hostname && ` · ${context.hostname}`}
           </button>
         ))}
       </div>
       <div ref={list}>
         {accounts.map((account, index) => {
           const code = vault.codes[account.id];
+          const icon = accountIcons.get(account.id);
           const hideCode =
             vault.settings.hideCodes &&
             hovered !== account.id &&
@@ -263,9 +292,6 @@ export function AccountList({
                         ? 'chipSite'
                         : 'groupAll'
                   )}
-                  {group === 'site' && context?.hostname
-                    ? ` · ${context.hostname}`
-                    : ''}
                 </div>
               )}
               <div
@@ -300,7 +326,9 @@ export function AccountList({
                     }
                   }}
                 >
-                  {(account.issuer || account.label).slice(0, 1).toUpperCase()}
+                  {icon ? (
+                    <img className="size-5 pointer-events-none" src={icon} alt="" draggable={false} />
+                  ) : (account.issuer || account.label).slice(0, 1).toUpperCase()}
                 </button>
                 <button
                   className="card-main"
@@ -317,13 +345,15 @@ export function AccountList({
                         fill="currentColor"
                         style={{
                           display: 'inline',
-                          marginLeft: 4,
-                          color: 'var(--amber)'
+                          marginInlineStart: 4,
+                          color: 'var(--favorite)'
                         }}
                       />
                     )}
                   </div>
-                  <div className="card-acct">{account.label}</div>
+                  {account.issuer && account.issuer !== account.label && (
+                    <div className="card-acct">{account.label}</div>
+                  )}
                   <div className="card-code">
                     <span
                       className={`code ${hideCode ? 'hidden-code' : ''} ${expiring ? 'low' : ''}`}

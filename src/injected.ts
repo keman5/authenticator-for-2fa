@@ -1,4 +1,4 @@
-import logoMarkup from "../assets/brand/icons/authenticator-2fa-icon.svg?raw";
+import logoMarkup from "../assets/brand/icons/authenticator-for-2fa-icon.svg?raw";
 
 const injectedScope = globalThis as typeof globalThis & {
   __authenticator2FAInstalled?: boolean;
@@ -179,9 +179,9 @@ function fill(value: unknown, target?: HTMLInputElement): boolean {
   return true;
 }
 function selectRegion(): void {
-  if (document.getElementById("authenticator-2fa-selection")) return;
+  if (document.getElementById("authenticator-for-2fa-selection")) return;
   const cover = document.createElement("div");
-  cover.id = "authenticator-2fa-selection";
+  cover.id = "authenticator-for-2fa-selection";
   Object.assign(cover.style, {
     position: "fixed",
     inset: "0",
@@ -361,7 +361,7 @@ function installPageMenu() {
         root.append(style);
         const list = document.createElement("div");
         list.setAttribute("role", "group");
-        list.setAttribute("aria-label", "Authenticator - 2FA");
+        list.setAttribute("aria-label", "Authenticator-For-2FA");
         list.hidden = true;
         const rows: {
           button: HTMLButtonElement;
@@ -563,7 +563,7 @@ function installPageMenu() {
             updateRows();
           };
         }
-        trigger.setAttribute("aria-label", "Authenticator - 2FA");
+        trigger.setAttribute("aria-label", "Authenticator-For-2FA");
         trigger.setAttribute("aria-expanded", "false");
         trigger.setAttribute("aria-haspopup", "true");
         trigger.addEventListener("pointerdown", (event) =>

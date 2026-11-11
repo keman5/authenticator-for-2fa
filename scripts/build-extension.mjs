@@ -44,7 +44,7 @@ const { version: packageVersion, extensionVersion } = JSON.parse(
 );
 const version = extensionVersion ?? packageVersion;
 // The SVG uses the icon24 reference's 3px ring at 24px (6 / 48 viewBox units).
-const icon = await readFile("assets/brand/icons/authenticator-2fa-icon.svg");
+const icon = await readFile("assets/brand/icons/authenticator-for-2fa-icon.svg");
 for (const size of [16, 32, 48, 128])
   await sharp(icon)
     .resize(size, size)
@@ -104,10 +104,10 @@ for (const [locale, [description, normal]] of Object.entries(locales)) {
   );
   delete inherited.direct;
   const messages = {
-    name: "Authenticator - 2FA",
+    name: "Authenticator-For-2FA",
     shortName: "2FA Codes",
     description,
-    title: "Authenticator - 2FA",
+    title: "Authenticator-For-2FA",
     normal,
   };
   await writeFile(

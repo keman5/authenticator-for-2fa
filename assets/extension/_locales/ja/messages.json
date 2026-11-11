@@ -15,7 +15,7 @@
     "message": "ポップアップを開く"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "ワンタイムコード、任意の画面ロック、暗号化バックアップ。"
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "画面ロックで開く"

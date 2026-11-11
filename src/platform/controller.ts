@@ -46,6 +46,7 @@ import { clearVaultSessionKey, renewPanelLease } from "./session";
 import { needsFilePickerWindow, openAppWindow } from "./windows";
 import { detectBrowserLanguage } from "../lib/i18n/languages";
 import { t } from "../lib/i18n/messages";
+import { clearSiteIcons } from "./siteIcons";
 
 type SyncStatus = "off" | "ready" | "syncing" | "pending" | "error";
 const initialState = () => ({
@@ -158,7 +159,7 @@ export class AuthenticatorVault {
           ? -1
           : (workspace.gate.lockAfter ?? 0) / 60
         : 0,
-      enhancedInputMenu: p.inputMenu ?? false,
+      enhancedInputMenu: p.inputMenu,
       passkeyDefault: p.passkeyDefault ?? false,
       lastBackupAt: p.lastBackupAt,
     };
@@ -219,11 +220,10 @@ export class AuthenticatorVault {
   }
   async refreshCodes() {
     if (this.locked) return;
+    if (panelExpired(this.space.gate, this.space.gate?.unlockedAt))
+      await this.checkAutoLock();
+    if (this.locked) return;
     const stamp = this.space.gate?.unlockedAt;
-    if (panelExpired(this.space.gate, stamp)) {
-      await this.lock();
-      return;
-    }
     const duration = this.space.gate?.lockAfter ?? 0;
     await renewPanelLease(
       this.space,
@@ -382,6 +382,7 @@ export class AuthenticatorVault {
           patch.autoLockMinutes < 0 ? -1 : patch.autoLockMinutes * 60;
         if (!LOCK_DURATIONS.includes(seconds))
           throw new Error("Invalid lock duration.");
+        space.gate.unlockedAt = Date.now();
         space.gate.lockAfter = seconds;
       }
     });
@@ -458,15 +459,18 @@ export class AuthenticatorVault {
       if (epoch === this.epoch) this.busy = false;
     }
   }
+  private hideAccounts() {
+    this.epoch++;
+    this.busy = false;
+    this.locked = this.passwordProtected;
+    this.accounts = [];
+    this.codes = {};
+  }
   async lock() {
     if (this.locking) return;
     this.locking = true;
     try {
-      this.epoch++;
-      this.busy = false;
-      this.locked = this.passwordProtected;
-      this.accounts = [];
-      this.codes = {};
+      this.hideAccounts();
       await clearVaultSessionKey();
       if (!this.passwordProtected) return;
       await transaction((space) => {
@@ -479,16 +483,60 @@ export class AuthenticatorVault {
       this.locking = false;
     }
   }
-  async recordActivity() {
-    /* Screen-lock deadlines advance only after successful authentication. */
+  async recordActivity(at = Date.now()) {
+    const gate = this.space.gate;
+    if (this.locked || this.locking || !gate || (gate.lockAfter ?? 0) <= 0)
+      return;
+    const epoch = this.epoch;
+    const { workspace, result: renewed } = await transaction((space) => {
+      const current = space.gate;
+      if (
+        epoch !== this.epoch ||
+        !current ||
+        current.proof !== gate.proof ||
+        current.lockedAt !== gate.lockedAt ||
+        (current.lockAfter ?? 0) <= 0 ||
+        at <= (current.unlockedAt ?? 0) ||
+        !cacheIsOpen(current, at)
+      )
+        return false;
+      current.unlockedAt = at;
+      return true;
+    });
+    if (renewed && epoch === this.epoch && this.space.gate)
+      this.space.gate.unlockedAt = Math.max(
+        this.space.gate.unlockedAt ?? 0,
+        workspace.gate!.unlockedAt!,
+      );
   }
   async checkAutoLock() {
-    const workspace = await readWorkspace();
-    if (!workspace.gate) return;
-    if (!this.locked && panelExpired(workspace.gate, workspace.gate.unlockedAt))
-      await this.lock();
-    else if (workspace.gate.proof !== this.space.gate?.proof)
+    const epoch = this.epoch;
+    const { gate } = await readWorkspace();
+    if (epoch !== this.epoch || this.locked || this.locking) return;
+    if (
+      gate?.proof !== this.space.gate?.proof ||
+      gate?.lockedAt !== this.space.gate?.lockedAt
+    ) {
       await this.initialize();
+      return;
+    }
+    if (!gate) return;
+    this.space.gate = gate;
+    if (!panelExpired(gate, gate.unlockedAt)) return;
+    const { result: expired } = await transaction(({ gate: current }) => {
+      if (
+        epoch !== this.epoch ||
+        !current ||
+        current.proof !== gate.proof ||
+        current.lockedAt !== gate.lockedAt ||
+        !panelExpired(current, current.unlockedAt)
+      )
+        return false;
+      delete current.unlockedAt;
+      current.lockedAt = nextChange(current.lockedAt);
+      return true;
+    });
+    if (expired && epoch === this.epoch) this.hideAccounts();
   }
   get touchIDEnabled() {
     return this.space.gate?.touchID === true;
@@ -604,6 +652,7 @@ export class AuthenticatorVault {
       delete space.connection;
     });
     removePasskey();
+    clearSiteIcons();
     this.showNotice(t(language, "noticeDataCleared"), language);
   }
   showNotice(message: string, language?: string) {

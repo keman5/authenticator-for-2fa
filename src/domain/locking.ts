@@ -1,7 +1,6 @@
 import type { Gate } from "./records";
 export const LOCK_DURATIONS = [
   0,
-  30,
   ...Array.from({ length: 10 }, (_, i) => (i + 1) * 60),
   1800,
   ...Array.from({ length: 24 }, (_, i) => (i + 1) * 3600),

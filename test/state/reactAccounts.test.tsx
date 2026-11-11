@@ -5,7 +5,8 @@ import {
   cleanup,
   fireEvent,
   render,
-  screen
+  screen,
+  waitFor
 } from '@testing-library/react';
 import { AccountList } from '../../src/features/accounts/AccountList';
 import { VaultProvider } from '../../src/app/vault';
@@ -50,6 +51,7 @@ test('folded All keeps favorites visible alongside site matches and reveals the 
   expect(
     screen.getByRole('button', { name: 'Copy: Example site-user' })
   ).toBeTruthy();
+  expect(screen.queryByText('Current site · example.com')).toBeNull();
   expect(
     screen.queryByRole('button', { name: 'Copy: Other other-user' })
   ).toBeNull();
@@ -59,6 +61,33 @@ test('folded All keeps favorites visible alongside site matches and reveals the 
   expect(
     screen.getByRole('button', { name: 'Copy: Other other-user' })
   ).toBeTruthy();
+});
+test('a matched site icon is reused when reopened away from the site and cleared by reset', async () => {
+  installStructuredCloneChromeStorage();
+  const icon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aRwAAAABJRU5ErkJggg==';
+  const sendMessage = vi.fn((_request, reply) => reply({ ok: true, value: icon }));
+  Object.assign(chrome.runtime, { sendMessage });
+  const vault = new AuthenticatorVault();
+  await vault.initialize();
+  await vault.addAccount({ issuer: 'Example', label: 'user', site: 'example.com', secret: 'JBSWY3DPEHPK3PXP' });
+  const show = (hostname?: string) => render(
+    <VaultProvider vault={vault}>
+      <AccountList query="" context={hostname ? { hostname } : null} onEdit={() => {}} onQr={() => {}} onCopy={() => {}} />
+    </VaultProvider>
+  );
+  try {
+    const initial = show('example.com');
+    await waitFor(() => expect(initial.container.querySelector('.avatar img')?.getAttribute('src')).toBe(icon));
+    initial.unmount();
+    const reopened = show();
+    expect(reopened.container.querySelector('.avatar img')?.getAttribute('src')).toBe(icon);
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    reopened.unmount();
+    await vault.resetVault();
+    expect(localStorage.getItem('site-icons-v1')).toBeNull();
+  } finally {
+    localStorage.removeItem('site-icons-v1');
+  }
 });
 test('keyboard manual ordering persists without consuming or modifying OTP secrets', async () => {
   installStructuredCloneChromeStorage();

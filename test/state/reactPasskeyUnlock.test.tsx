@@ -117,7 +117,7 @@ test('an explicit passkey handoff authenticates once in the persistent destinati
   expect(vault.locked).toBe(true);
   expect(get).toHaveBeenCalledOnce();
 });
-test('the saved default authenticates once, including after a later explicit lock', async () => {
+test('the saved default authenticates on entry; a manual lock waits for a passkey click', async () => {
   const { vault, get } = await protectedVault(true);
   const reopened = new AuthenticatorVault();
   await reopened.initialize();
@@ -125,7 +125,13 @@ test('the saved default authenticates once, including after a later explicit loc
   render(<App vault={vault} />);
   await screen.findByRole('button', { name: 'Copy: Example alice' });
   expect(get).toHaveBeenCalledOnce();
-  await act(() => vault.lock());
+  fireEvent.click(screen.getByRole('button', { name: 'Lock' }));
+  const passkey = await screen.findByRole('button', { name: 'Passkey' });
+  await waitFor(() => expect(passkey.hasAttribute('disabled')).toBe(false));
+  expect(vault.locked).toBe(true);
+  expect(get).toHaveBeenCalledOnce();
+
+  fireEvent.click(passkey);
   await screen.findByRole('button', { name: 'Copy: Example alice' });
   expect(get).toHaveBeenCalledTimes(2);
 });

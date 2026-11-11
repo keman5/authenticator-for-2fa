@@ -98,7 +98,7 @@ it("positions the import window at the popup and keeps it within the screen", ()
       availWidth: 1440,
       availHeight: 875,
     }),
-  ).toEqual({ left: 1060, top: 80, width: 380, height: 720 });
+  ).toEqual({ left: 1060, top: 80, width: 380, height: 755 });
   expect(
     fileWindowBounds(-1100, 800, {
       availLeft: -1440,
@@ -106,7 +106,7 @@ it("positions the import window at the popup and keeps it within the screen", ()
       availWidth: 1440,
       availHeight: 900,
     }),
-  ).toEqual({ left: -1100, top: 180, width: 380, height: 720 });
+  ).toEqual({ left: -1100, top: 145, width: 380, height: 755 });
 });
 it("positions the Firefox import window at the browser's upper-right below the toolbar", () => {
   expect(
@@ -116,7 +116,7 @@ it("positions the Firefox import window at the browser's upper-right below the t
       { availLeft: 0, availTop: 25, availWidth: 1440, availHeight: 875 },
       { left: 100, top: 50, width: 1000 },
     ),
-  ).toEqual({ left: 720, top: 135, width: 380, height: 720 });
+  ).toEqual({ left: 720, top: 135, width: 380, height: 755 });
   expect(
     fileWindowBounds(
       -1100,
@@ -259,6 +259,6 @@ it("provides every runtime translation and stable product name", () => {
   for (const [locale] of languages)
     for (const [key, variants] of Object.entries(messages)) {
       expect(variants[locale], `${locale}/${key}`).toBeTruthy();
-      expect(translate(locale, "appName")).toBe("Authenticator - 2FA");
+      expect(translate(locale, "appName")).toBe("Authenticator-For-2FA");
     }
 });

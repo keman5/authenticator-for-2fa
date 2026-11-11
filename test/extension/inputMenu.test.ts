@@ -94,7 +94,6 @@ test.each(["hotp", "totp"] as const)(
       type,
     });
     await vault.changePassword("", "1");
-    await vault.updateSettings({ enhancedInputMenu: true });
     await import("../../src/worker");
     let root!: ShadowRoot;
     // oxlint-disable-next-line typescript/unbound-method

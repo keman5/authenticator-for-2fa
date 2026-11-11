@@ -35,7 +35,7 @@ async function tree(root, relative = "", skip = new Set()) {
 }
 for (const target of ["chrome", "edge", "firefox", "safari"])
   await writeFile(
-    `artifacts/authenticator-workspace-${version}-${target}.zip`,
+    `artifacts/authenticator-for-2fa-${version}-${target}.zip`,
     zipSync(await tree(`dist/${target}`), { level: 9 }),
   );
 const sources = {};
@@ -67,7 +67,7 @@ for (const name of [
   sources[name] = new Uint8Array(await readFile(name));
 }
 await writeFile(
-  `artifacts/authenticator-workspace-${version}-source.zip`,
+  `artifacts/authenticator-for-2fa-${version}-source.zip`,
   zipSync(sources, { level: 9 }),
 );
 console.log("Extension and review-source archives written to artifacts/.");
@@ -75,7 +75,7 @@ console.log("Extension and review-source archives written to artifacts/.");
 try {
   await access("dist/touch-id/Authenticator Touch ID.app");
   await writeFile(
-    `artifacts/authenticator-workspace-${version}-touch-id-macos.zip`,
+    `artifacts/authenticator-for-2fa-${version}-touch-id-macos.zip`,
     zipSync(await tree("dist/touch-id"), { level: 9 }),
   );
 } catch (error) {
@@ -86,7 +86,7 @@ const downloads = join(homedir(), "Downloads", "dist");
 await mkdir(downloads, { recursive: true });
 for (const name of await readdir("artifacts"))
   if (
-    name.startsWith(`authenticator-workspace-${version}-`) &&
+    name.startsWith(`authenticator-for-2fa-${version}-`) &&
     name.endsWith(".zip")
   )
     await cp(join("artifacts", name), join(downloads, name));

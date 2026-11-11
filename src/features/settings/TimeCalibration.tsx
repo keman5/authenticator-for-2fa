@@ -44,15 +44,7 @@ export function TimeCalibration() {
       </span>
       <button
         type="button"
-        className="btn btn-sm btn-soft"
-        style={{
-          maxWidth: "50%",
-          flexShrink: 0,
-          height: "auto",
-          minHeight: 32,
-          whiteSpace: "normal",
-          overflowWrap: "anywhere",
-        }}
+        className="btn btn-soft max-w-1/2 shrink-0 wrap-anywhere"
         disabled={busy}
         aria-busy={busy}
         onClick={() => void calibrate()}

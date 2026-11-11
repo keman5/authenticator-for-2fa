@@ -1,10 +1,10 @@
-# Privacy Policy — Authenticator - 2FA
+# Privacy Policy — Authenticator-For-2FA
 
 Effective date: November 9, 2026
 
 [简体中文](PRIVACY.zh-CN.md)
 
-This policy covers Authenticator - 2FA and its optional local authentication companion. The project maintainer can be contacted at **support@macseek.cc**. Project information: <https://github.com/keman5/authenticator-2fa>.
+This policy covers Authenticator-For-2FA and its optional local authentication companion. The project maintainer can be contacted at **support@macseek.cc**. Project information: <https://github.com/keman5/authenticator-for-2fa>.
 
 ## Account information and local storage
 
@@ -19,6 +19,8 @@ Files you select, QR images, camera frames and screen/page captures are processe
 ## Webpage interaction and clipboard
 
 When you use site matching or page filling, the extension reads the active page's hostname and may read its title. After authorization it can inspect a selected page for QR codes or identify OTP inputs. Optional input menus require website access. Account labels can appear in those menus. When you choose an account to fill, its current verification code is sent to the destination webpage; that website can read it and handles it under its own policy. The extension does not send the underlying OTP secret to the page or submit the sign-in form.
+
+For matching accounts, the extension may read the active page's favicon, using the browser cache when available. An icon request goes to the page's icon address without credentials, a referrer, or account data. Small copies are cached locally by hostname, are excluded from backups and sync, and are cleared by the local data reset.
 
 Copy actions place codes or a sync recovery key on the system clipboard. Other software and clipboard-history services may access copied content under their own permissions and policies.
 

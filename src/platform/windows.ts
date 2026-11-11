@@ -82,7 +82,7 @@ export async function openAppWindow(
   if (route === "add-screen") url.searchParams.set("temporaryScan", "1");
   if (surface === "browser-window") url.searchParams.set("camera", "1");
   const width = route === "add-screen" ? 740 : 370,
-    height = surface === "browser-window" ? 800 : 680;
+    height = surface === "browser-window" ? 800 : 755;
   let bounds: Partial<chrome.windows.CreateData> = { width, height };
   if (window.screen?.availWidth > 0 && window.screen?.availHeight > 0) {
     let source: chrome.windows.Window | undefined;

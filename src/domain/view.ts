@@ -67,7 +67,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   alwaysShowAllCodes: false,
   accountSortMode: "contextual",
   autoLockMinutes: 0,
-  enhancedInputMenu: false,
+  enhancedInputMenu: true,
   passkeyDefault: false,
 };
 export const createDefaultAppSettings = (): AppSettings => ({

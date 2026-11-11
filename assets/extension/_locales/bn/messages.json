@@ -15,7 +15,7 @@
     "message": "পপআপ খুলুন"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "একবারের কোড, ঐচ্ছিক স্ক্রিন লক ও এনক্রিপ্ট করা ব্যাকআপ।"
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "লক দিয়ে খুলুন"

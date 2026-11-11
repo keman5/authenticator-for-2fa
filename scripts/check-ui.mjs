@@ -160,13 +160,13 @@ try {
     `chrome.storage.local.set({'${store}':{schema:2,records:{},preferences:{locale:'en',languageMode:'manual',theme:'light',conceal:false,seconds:true,paste:false,matchSite:false}}})`,
   );
   page = await open();
-  await metrics(720);
+  await metrics(755);
   await until(
     () => page.evaluate("document.querySelector('.p-nav')!==null"),
     "React UI",
   );
   for (const toolbar of [false, true])
-    for (const height of [400, 600, 680, 687, 700, 720, 800]) {
+    for (const height of [400, 600, 680, 687, 700, 720, 755, 800]) {
       await metrics(height);
       await page.evaluate(
         `document.documentElement.classList.toggle('toolbar-popup',${toolbar});document.documentElement.classList.toggle('toolbar-popup-sized',${toolbar})`,
@@ -178,7 +178,7 @@ try {
       assert.equal(bounds.bottom, height);
       assert.ok(bounds.width <= 370);
     }
-  await metrics(720);
+  await metrics(755);
   await page.evaluate(
     "document.documentElement.classList.remove('toolbar-popup','toolbar-popup-sized')",
   );
@@ -340,10 +340,10 @@ try {
     ),
     "true",
   );
-  await click("seconds");
-  await click("30 seconds");
+  await click("minutes");
+  await click("1 minutes");
   await until(
-    async () => (await state()).gate.lockAfter === 30,
+    async () => (await state()).gate.lockAfter === 60,
     "timed setting",
   );
   const stamp = (await state()).gate.unlockedAt;
@@ -354,10 +354,21 @@ try {
   page = await open();
   await until(codes, "authenticated deadline persists across browser restart");
   assert.equal((await state()).gate.unlockedAt, stamp);
-  await page.evaluate(
-    "globalThis.originalNow=Date.now;Date.now=()=>globalThis.originalNow()+31000",
-  );
-  await until(locked, "open panel expires");
+  const setClock = (offset) =>
+    page.evaluate(`globalThis.originalNow ??= Date.now; Date.now=()=>globalThis.originalNow()+${offset}`);
+  await setClock(15000);
+  await page.call("Input.dispatchMouseEvent", {
+    type: "mousePressed", button: "left", buttons: 1, clickCount: 1, x: 5, y: 5,
+  });
+  await until(async () => (await state()).gate.unlockedAt > stamp, "mouse press renews idle deadline");
+  await setClock(65000);
+  await until(async () => (await state()).gate.unlockedAt >= stamp + 65000, "held mouse renews idle deadline");
+  assert.equal(await codes(), true);
+  await page.call("Input.dispatchMouseEvent", {
+    type: "mouseReleased", button: "left", clickCount: 1, x: 5, y: 5,
+  });
+  await setClock(126000);
+  await until(locked, "open panel expires after pointer release and inactivity");
   await page.evaluate("Date.now=globalThis.originalNow");
   await field("Password", "1");
   await click("Unlock");
@@ -377,7 +388,7 @@ try {
   await page.call("Page.reload");
   await until(locked, "explicit lock survives reload");
   console.log(
-    "PASS actual headless Edge: React UI, real PNG/WASM import, 370px layout at 7 heights, 34px header icon, one-character password, rejected legacy bypass URLs, shortcut settings navigation, grouped auto-lock selection, restart, fixed deadlines.",
+    "PASS actual headless Edge: React UI, real PNG/WASM import, 370px layout at 8 heights, 34px header icon, one-character password, rejected legacy bypass URLs, shortcut settings navigation, grouped auto-lock selection, restart, idle locking after pointer release.",
   );
 } catch (error) {
   if (page)

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 48 48">
-  <title>Authenticator - 2FA</title>
+  <title>Authenticator-For-2FA</title>
   <defs><linearGradient id="shield" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D2F52"/><stop offset="1" stop-color="#0B1526"/></linearGradient></defs>
   <circle cx="24" cy="24" r="19.6" fill="url(#shield)"/>
   <circle cx="24" cy="24" r="20.2" fill="none" stroke="#DADCE0" stroke-width="6"/>

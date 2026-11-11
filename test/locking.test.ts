@@ -15,7 +15,6 @@ const gate = (lockAfter = 0, unlockedAt: number | undefined = now): Gate => ({
 it("offers exactly the requested durations plus close-to-lock", () => {
   expect([...LOCK_DURATIONS]).toEqual([
     0,
-    30,
     ...Array.from({ length: 10 }, (_, i) => (i + 1) * 60),
     1800,
     ...Array.from({ length: 24 }, (_, i) => (i + 1) * 3600),
@@ -43,7 +42,7 @@ it("default closes without caching, permanent still requires a successful unlock
   expect(cacheIsOpen(undefined, now)).toBe(true);
 });
 it("a fresh successful unlock restarts the deadline; clearing the timestamp locks immediately", () => {
-  const value = gate(30, now - 30_000);
+  const value = gate(60, now - 60_000);
   expect(cacheIsOpen(value, now)).toBe(false);
   value.unlockedAt = now;
   expect(cacheIsOpen(value, now)).toBe(true);

@@ -15,7 +15,7 @@
     "message": "पॉपअप खोलें"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "एक बार के कोड, वैकल्पिक स्क्रीन लॉक और एन्क्रिप्टेड बैकअप।"
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "लॉक के साथ खोलें"

@@ -7,7 +7,7 @@
 | Partner Center 项目 | 准备的内容 |
 | --- | --- |
 | 包 | `extension.zip`，manifest 直接在 ZIP 根目录 |
-| 名称／短描述 | 由包中的 `_locales` 元数据提供；产品名 Authenticator - 2FA |
+| 名称／短描述 | 由包中的 `_locales` 元数据提供；产品名 Authenticator-For-2FA |
 | 各语言描述 | `listing.en.json`、`listing.zh-CN.json` 的 description；其他启用语言需补齐描述，可在控制台允许时使用英文内容 |
 | 类别 | Productivity 或控制台最接近的类别 |
 | 搜索词 | JSON 的 keywords；按控制台限制逐项填写 |

@@ -26,7 +26,7 @@ const manifest = JSON.parse(await readFile("dist/edge/manifest.json", "utf8"));
 if (manifest.version !== version)
   throw new Error("Build the current version first.");
 for (const size of [128, 300, 512, 1024])
-  await sharp("assets/brand/icons/authenticator-2fa-icon.svg", {
+  await sharp("assets/brand/icons/authenticator-for-2fa-icon.svg", {
     density: (72 * size) / 128,
   })
     .resize(size, size)
@@ -287,7 +287,7 @@ try {
     if (targetManifest.version !== version)
       throw new Error(`${target}: stale build`);
     await cp(
-      `artifacts/authenticator-workspace-${version}-${target}.zip`,
+      `artifacts/authenticator-for-2fa-${version}-${target}.zip`,
       join(folder, "extension.zip"),
     );
     if (target === "firefox") {
@@ -297,7 +297,7 @@ try {
       )
         throw new Error("Unexpected Firefox submission ID");
       await cp(
-        `artifacts/authenticator-workspace-${version}-source.zip`,
+        `artifacts/authenticator-for-2fa-${version}-source.zip`,
         join(folder, "source.zip"),
       );
     }

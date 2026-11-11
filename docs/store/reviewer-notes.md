@@ -1,4 +1,4 @@
-# Reviewer notes — Authenticator - 2FA
+# Reviewer notes — Authenticator-For-2FA
 
 Contact: **support@macseek.cc**. No developer account, purchase, subscription or developer-hosted login is needed for basic use. Use only synthetic test accounts below. Optional browser sync needs the reviewer's own browser sync account; do not provide or request a real user's credentials.
 

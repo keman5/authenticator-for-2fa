@@ -11,6 +11,7 @@ import { parseTransfer } from "./domain/transfer";
 import { insertRecords, InputError } from "./domain/records";
 import { scanImage } from "./domain/qr";
 import { transaction } from "./platform/repository";
+import { isSiteIcon, readPageIcon } from "./platform/siteIcons";
 
 chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
   if (!message || typeof message !== "object") return;
@@ -18,6 +19,7 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
   if (
     ![
       "context",
+      "site-icon",
       "fill",
       "scan",
       "capture",
@@ -101,10 +103,33 @@ async function handle(
     if (!tab?.url) return { hostname: "" };
     try {
       const url = new URL(tab.url);
-      return { hostname: /^https?:$/.test(url.protocol) ? url.hostname : "" };
+      return /^https?:$/.test(url.protocol)
+        ? {
+            hostname: url.hostname,
+            ...(tab.favIconUrl && { faviconReady: true }),
+          }
+        : { hostname: "" };
     } catch {
       return { hostname: "" };
     }
+  }
+  if (request.kind === "site-icon") {
+    if (
+      sender.url?.split(/[?#]/)[0] !== chrome.runtime.getURL("index.html") ||
+      tab?.id === undefined ||
+      !tab.url ||
+      !/^https?:/.test(tab.url) ||
+      tab.incognito
+    )
+      return null;
+    const url = new URL(tab.url);
+    if (url.hostname !== request.hostname) return null;
+    const [icon] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: readPageIcon,
+      args: [url.origin, tab.favIconUrl ?? ""],
+    });
+    return isSiteIcon(icon?.result) ? icon.result : null;
   }
   if (!tab?.id || !/^https?:/.test(tab.url ?? ""))
     throw new InputError("unavailable");
@@ -352,11 +377,12 @@ chrome.tabs.onActivated?.addListener((info) => {
     .catch(() => {});
 });
 chrome.tabs.onUpdated?.addListener((_id, change, tab) => {
-  if (change.url && tab.active)
+  if ((change.url || change.favIconUrl) && tab.active)
     void chrome.runtime
       .sendMessage({
         type: "active-page-context-changed",
         windowId: tab.windowId,
+        clearCurrent: Boolean(change.url),
       })
       .catch(() => {});
 });

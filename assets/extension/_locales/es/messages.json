@@ -15,7 +15,7 @@
     "message": "Abrir ventana emergente"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "Códigos de un solo uso, bloqueo opcional y copias cifradas."
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "Abrir con bloqueo"

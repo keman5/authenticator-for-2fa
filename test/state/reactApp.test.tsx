@@ -923,6 +923,49 @@ test("account filter and navigation keep their meanings after switching Chinese 
   expect(screen.getByRole("button", { name: "Favoris" })).toBeTruthy();
 });
 
+test("the input menu defaults on, asks for website access only on demand, and remembers turning it off", async () => {
+  const user = userEvent.setup();
+  const request = vi.fn<() => Promise<boolean>>()
+    .mockResolvedValueOnce(false)
+    .mockResolvedValueOnce(true);
+  Object.assign(chrome, {
+    permissions: { contains: vi.fn(async () => false), request },
+  });
+  const vault = await openApp();
+  await user.click(screen.getByRole("button", { name: "Settings" }));
+  const toggle = screen.getByRole<HTMLInputElement>("switch", {
+    name: "Page input enhancement menu",
+  });
+  const allow = await screen.findByRole("button", { name: "Allow website access" });
+  expect(toggle.checked).toBe(true);
+  expect(request).not.toHaveBeenCalled();
+  await user.click(allow);
+  expect(request).toHaveBeenCalledWith({ origins: ["http://*/*", "https://*/*"] });
+  expect(screen.getByRole("button", { name: "Allow website access" })).toBeTruthy();
+  await user.click(allow);
+  await waitFor(() =>
+    expect(screen.queryByRole("button", { name: "Allow website access" })).toBeNull(),
+  );
+  await user.click(toggle);
+  await waitFor(() => expect(vault.settings.enhancedInputMenu).toBe(false));
+  const reopened = new AuthenticatorVault();
+  await reopened.initialize();
+  expect(reopened.settings.enhancedInputMenu).toBe(false);
+});
+
+test("auto-lock prompts for an interface password before offering durations", async () => {
+  const user = userEvent.setup();
+  const vault = await openApp();
+  await user.click(screen.getByRole("button", { name: "Settings" }));
+  await user.click(screen.getByRole("button", { name: "Auto-lock" }));
+  expect((await screen.findByRole("status")).textContent).toBe("Set a password first");
+  expect(screen.queryByRole("group", { name: "Auto-lock" })).toBeNull();
+  await act(() => vault.changePassword("", "1"));
+  await user.click(screen.getByRole("button", { name: "Settings" }));
+  await user.click(screen.getByRole("button", { name: "Auto-lock" }));
+  expect(await screen.findByRole("button", { name: "Never" })).toBeTruthy();
+});
+
 test("auto-lock filters by unit without saving until a duration is selected, and reopens at the saved unit", async () => {
   const user = userEvent.setup();
   const vault = await openApp();
@@ -951,10 +994,8 @@ test("auto-lock filters by unit without saving until a duration is selected, and
       .getByRole("button", { name: "minutes" })
       .getAttribute("aria-pressed"),
   ).toBe("true");
-  await user.click(screen.getByRole("button", { name: "seconds" }));
-  await user.click(screen.getByRole("button", { name: "30 seconds" }));
-  await waitFor(() => expect(vault.settings.autoLockMinutes).toBe(0.5));
-  await user.click(toggle);
+  expect(screen.queryByRole("button", { name: "seconds" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "30 seconds" })).toBeNull();
   await user.click(screen.getByRole("button", { name: "Never" }));
   await waitFor(() => expect(vault.settings.autoLockMinutes).toBe(-1));
 });

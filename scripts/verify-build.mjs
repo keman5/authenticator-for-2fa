@@ -26,7 +26,7 @@ for (const target of ["chrome", "edge", "firefox", "safari"]) {
   );
   for (const locale of await readdir(`${root}/_locales`)) {
     const values = await read(`${root}/_locales/${locale}/messages.json`);
-    assert.equal(values.name.message, "Authenticator - 2FA");
+    assert.equal(values.name.message, "Authenticator-For-2FA");
     assert.ok(values.shortName.message.length <= 12);
     for (const field of [
       manifest.name,

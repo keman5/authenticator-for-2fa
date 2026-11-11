@@ -15,7 +15,7 @@
     "message": "팝업 열기"
   },
   "name": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "shortName": {
     "message": "2FA Codes"
@@ -24,7 +24,7 @@
     "message": "일회용 코드, 선택적 화면 잠금 및 암호화된 백업."
   },
   "title": {
-    "message": "Authenticator - 2FA"
+    "message": "Authenticator-For-2FA"
   },
   "normal": {
     "message": "화면 잠금으로 열기"

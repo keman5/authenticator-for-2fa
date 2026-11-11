@@ -179,6 +179,32 @@ test("malformed manual lock stamps are rejected at storage boundaries", async ()
       validateWorkspace({ ...workspace, gate: { ...gate, lockedAt } }),
     ).toThrow("corrupt");
 });
+test("upgrading a 30-second lock uses one minute and requires a fresh unlock", async () => {
+  const gate = await newGate("1");
+  const workspace = await readWorkspace();
+  await new Promise<void>((resolve) =>
+    chrome.storage.local.set(
+      {
+        [DOCUMENT_KEY]: {
+          ...workspace,
+          gate: { ...gate, lockAfter: 30, unlockedAt: Date.now() },
+        },
+      },
+      resolve,
+    ),
+  );
+
+  const vault = new AuthenticatorVault();
+  await vault.initialize();
+  expect(vault.locked).toBe(true);
+  expect(vault.settings.autoLockMinutes).toBe(1);
+  await vault.unlock("1");
+  expect(vault.locked).toBe(false);
+  expect((await readWorkspace()).gate).toMatchObject({
+    lockAfter: 60,
+    unlockedAt: expect.any(Number),
+  });
+});
 test("stale editor, reorder and delete operations cannot overwrite newer account data", async () => {
   const vault = new AuthenticatorVault();
   await vault.initialize();

@@ -3,6 +3,7 @@ import type { AuthenticatorAccount } from "./view";
 export interface PageContext {
   hostname: string;
   title?: string;
+  faviconReady?: boolean;
 }
 const clean = (text: string) =>
   text
