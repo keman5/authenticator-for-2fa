@@ -258,7 +258,7 @@ function Application() {
   }, [theme]);
   const initialUnlock = useRef(true);
   useEffect(() => {
-    if (!vault.locked) initialUnlock.current = false;
+    if (vault.initialized && !vault.locked) initialUnlock.current = false;
     if (vault.locked) {
       setCelebration(0);
       setView('codes');
@@ -269,7 +269,7 @@ function Application() {
       setScannedAccountIds([]);
       setContext(null);
     }
-  }, [vault.locked]);
+  }, [vault.initialized, vault.locked]);
   useEffect(() => {
     if (vault.initialized && !vault.hasVault) {
       setView('codes');
@@ -426,8 +426,8 @@ function Application() {
         >
           <Plus size={19} />
         </button>
-        <div className={`search ${query ? 'has-text' : ''}`}>
-          <Search size={16} />
+        <div className={`input search ${query ? 'has-text' : ''}`}>
+          <Search size={14} aria-hidden="true" />
           <input
             type="search"
             value={query}
@@ -565,20 +565,20 @@ function Application() {
             { value: 'settings', key: 'navSettings', Icon: Settings }
           ] as const
         ).map(({ value, key, Icon }) => (
-          <button
-            key={value}
-            aria-label={ui(key)}
-            type="button"
-            className={navView === value ? 'active' : ''}
-            aria-current={navView === value ? 'page' : undefined}
-            onClick={() => {
-              setView(value);
-              if (body.current) body.current.scrollTop = 0;
-            }}
-          >
-            <Icon size={19} />
-            <span>{ui(key)}</span>
-          </button>
+          <div key={value} className="tooltip tooltip-top" data-tip={ui(key)}>
+            <button
+              aria-label={ui(key)}
+              type="button"
+              className={navView === value ? 'active' : ''}
+              aria-current={navView === value ? 'page' : undefined}
+              onClick={() => {
+                setView(value);
+                if (body.current) body.current.scrollTop = 0;
+              }}
+            >
+              <Icon size={20} aria-hidden="true" />
+            </button>
+          </div>
         ))}
       </nav>
       {!vault.locked && celebration > 0 && (
@@ -709,6 +709,7 @@ function LockScreen({
             value={password}
             onChange={setPassword}
             autoComplete="current-password"
+            autoFocus
             disabled={!ready || vault.busy || vault.locking}
           />
           <div className="btn-row">

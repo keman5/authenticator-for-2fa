@@ -292,7 +292,7 @@ test('Favorites precedes Current site and only the hovered or keyboard-focused a
   const chips = Array.from(container.querySelectorAll('.chip')).map((element) => element.textContent);
   expect(chips[1]).toBe('Favorites');
   expect(chips[2]).toContain('Current site');
-  const cards = container.querySelectorAll('.card');
+  const cards = container.querySelectorAll('.account-row');
   expect(container.querySelectorAll('.hidden-code')).toHaveLength(2);
   fireEvent.mouseEnter(cards[0]);
   expect(cards[0].querySelector('.hidden-code')).toBeNull();
@@ -330,7 +330,7 @@ test('a drag cannot overwrite account order refreshed by another panel', async (
   })[0];
   handle.setPointerCapture = vi.fn();
   fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
-  expect(document.querySelector('.card.dragging')).not.toBeNull();
+  expect(document.querySelector('.account-row.dragging')).not.toBeNull();
   const remoteOrder = [...vault.sortedAccounts]
     .reverse()
     .map((account) => account.id);
@@ -341,5 +341,5 @@ test('a drag cannot overwrite account order refreshed by another panel', async (
   expect(vault.sortedAccounts.map((account) => account.id)).toEqual(
     remoteOrder
   );
-  expect(document.querySelector('.card.dragging')).toBeNull();
+  expect(document.querySelector('.account-row.dragging')).toBeNull();
 });

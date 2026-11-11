@@ -172,9 +172,13 @@ try {
         `document.documentElement.classList.toggle('toolbar-popup',${toolbar});document.documentElement.classList.toggle('toolbar-popup-sized',${toolbar})`,
       );
       const bounds = await page.evaluate(
-        "(()=>{const r=document.querySelector('.p-nav').getBoundingClientRect();return {height:r.height,bottom:r.bottom,width:document.documentElement.scrollWidth}})()",
+        "(()=>{const n=document.querySelector('.p-nav'),r=n.getBoundingClientRect(),s=getComputedStyle(n);return {height:r.height,bottom:r.bottom,width:document.documentElement.scrollWidth,paddingTop:s.paddingTop,paddingBottom:s.paddingBottom,buttonHeight:n.querySelector('button').getBoundingClientRect().height,iconHeight:n.querySelector('svg').getBoundingClientRect().height}})()",
       );
-      assert.equal(bounds.height, 64);
+      assert.equal(bounds.height, 44);
+      assert.equal(bounds.paddingTop, "6px");
+      assert.equal(bounds.paddingBottom, "6px");
+      assert.equal(bounds.buttonHeight, 44);
+      assert.equal(bounds.iconHeight, 18);
       assert.equal(bounds.bottom, height);
       assert.ok(bounds.width <= 370);
     }

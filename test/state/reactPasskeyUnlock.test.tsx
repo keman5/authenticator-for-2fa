@@ -135,13 +135,22 @@ test('the saved default authenticates on entry; a manual lock waits for a passke
   await screen.findByRole('button', { name: 'Copy: Example alice' });
   expect(get).toHaveBeenCalledTimes(2);
 });
+test('opening a fresh panel loads the saved preference before automatically authenticating', async () => {
+  const { get } = await protectedVault(true);
+  const reopened = new AuthenticatorVault();
+  expect(reopened.initialized).toBe(false);
+  render(<App vault={reopened} />);
+  await screen.findByRole('button', { name: 'Copy: Example alice' });
+  expect(get).toHaveBeenCalledOnce();
+  expect(reopened.settings.passkeyDefault).toBe(true);
+});
 test('cancelling automatic authentication leaves password usable and does not loop', async () => {
   const { vault, get } = await protectedVault(true);
   get.mockRejectedValue(new DOMException('Cancelled', 'NotAllowedError'));
   render(<App vault={vault} />);
   await screen.findByRole('alert');
   const password = screen.getByLabelText('Password');
-  expect(document.activeElement).not.toBe(password);
+  expect(document.activeElement).toBe(password);
   fireEvent.change(password, { target: { value: '1' } });
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -154,6 +163,9 @@ test('an enabled preference without a registered credential does not request aut
   const { vault, get } = await protectedVault(true, false);
   render(<App vault={vault} />);
   await screen.findByLabelText('Password');
+  await waitFor(() =>
+    expect(document.activeElement).toBe(screen.getByLabelText('Password'))
+  );
   expect(get).not.toHaveBeenCalled();
   expect(vault.locked).toBe(true);
 });

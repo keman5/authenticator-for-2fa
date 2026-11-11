@@ -254,7 +254,7 @@ test.each(["delete confirmation", "drag preview"] as const)(
       });
       handle.setPointerCapture = vi.fn();
       fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
-      expect(document.querySelector(".card.dragging")).not.toBeNull();
+      expect(document.querySelector(".account-row.dragging")).not.toBeNull();
     }
     await act(() => vault.lock());
     expect(screen.getByRole("heading", { name: "Locked" })).toBeTruthy();
@@ -264,7 +264,7 @@ test.each(["delete confirmation", "drag preview"] as const)(
     expect(document.body.textContent).not.toContain("private-user");
     await act(() => vault.unlock("correct horse battery"));
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(document.querySelector(".card.dragging")).toBeNull();
+    expect(document.querySelector(".account-row.dragging")).toBeNull();
     expect(
       screen.getByRole("button", { name: "Copy: PrivateService private-user" }),
     ).toBeTruthy();
@@ -874,7 +874,7 @@ test("manual sync runs the real sync action, shows progress, then confirms local
 });
 
 test.each(["manual lock", "reopen"] as const)(
-  "password waits for Tab focus on the unlock screen after %s",
+  "password automatically focuses on the unlock screen after %s",
   async (mode) => {
     const user = userEvent.setup();
     let vault = await openApp();
@@ -890,16 +890,13 @@ test.each(["manual lock", "reopen"] as const)(
     await waitFor(() =>
       expect(screen.getByLabelText("Password").hasAttribute("disabled")).toBe(false),
     );
-    expect(document.activeElement).not.toBe(screen.getByLabelText("Password"));
-    // jsdom does not implement inert; tab past the inert header controls.
-    for (let tabs = 0; tabs < 12 && document.activeElement !== screen.getByLabelText("Password"); tabs++)
-      await user.tab();
     expect(document.activeElement).toBe(screen.getByLabelText("Password"));
     await user.keyboard("a{Enter}");
     await waitFor(() => expect(vault.locked).toBe(false));
     await user.click(screen.getByRole("button", { name: "Lock" }));
-    await screen.findByLabelText("Password");
-    expect(document.activeElement).not.toBe(screen.getByLabelText("Password"));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByLabelText("Password")),
+    );
   },
 );
 

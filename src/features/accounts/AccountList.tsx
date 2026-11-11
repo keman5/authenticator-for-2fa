@@ -63,7 +63,7 @@ export function AccountList({
   const [hovered, setHovered] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const list = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLUListElement>(null);
   const drag = useRef<{
     id: string;
     ids: string[];
@@ -256,7 +256,12 @@ export function AccountList({
           </button>
         ))}
       </div>
-      <div ref={list}>
+      <ul
+        className="list account-list"
+        role="list"
+        ref={list}
+        hidden={!accounts.length}
+      >
         {accounts.map((account, index) => {
           const code = vault.codes[account.id];
           const icon = accountIcons.get(account.id);
@@ -277,7 +282,7 @@ export function AccountList({
           return (
             <Fragment key={account.id}>
               {showGroup && (
-                <div className="group-label">
+                <li className="group-label" role="presentation">
                   {group === 'fav' ? (
                     <span className="fav-dot">
                       <Star size={11} fill="currentColor" />
@@ -292,10 +297,10 @@ export function AccountList({
                         ? 'chipSite'
                         : 'groupAll'
                   )}
-                </div>
+                </li>
               )}
-              <div
-                className={`card ${dragId === account.id ? 'dragging' : ''}`}
+              <li
+                className={`list-row account-row ${dragId === account.id ? 'dragging' : ''}`}
                 data-account-id={account.id}
                 onMouseEnter={() => setHovered(account.id)}
                 onMouseLeave={() => setHovered(null)}
@@ -334,26 +339,24 @@ export function AccountList({
                   className="card-main"
                   type="button"
                   aria-label={`${tr('copy')}: ${account.issuer} ${account.label}`}
-                  style={{ textAlign: 'start' }}
                   onClick={() => code && onCopy(code.value)}
                 >
-                  <div className="card-name">
-                    {account.issuer || account.label}
+                  <div className="account-identity">
+                    <span className="card-name">
+                      {account.issuer || account.label}
+                    </span>
                     {account.favorite && (
                       <Star
                         size={11}
+                        className="fav-dot shrink-0"
                         fill="currentColor"
-                        style={{
-                          display: 'inline',
-                          marginInlineStart: 4,
-                          color: 'var(--favorite)'
-                        }}
+                        aria-hidden="true"
                       />
                     )}
+                    {account.issuer && account.issuer !== account.label && (
+                      <span className="card-acct">{account.label}</span>
+                    )}
                   </div>
-                  {account.issuer && account.issuer !== account.label && (
-                    <div className="card-acct">{account.label}</div>
-                  )}
                   <div className="card-code">
                     <span
                       className={`code ${hideCode ? 'hidden-code' : ''} ${expiring ? 'low' : ''}`}
@@ -472,11 +475,11 @@ export function AccountList({
                     </div>,
                     document.querySelector('.pui') ?? document.body
                   )}
-              </div>
+              </li>
             </Fragment>
           );
         })}
-      </div>
+      </ul>
       {filter === 'all' && view.contextualAction && (
         <div className="fold-bar">
           <button
