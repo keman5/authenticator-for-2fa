@@ -14,12 +14,14 @@
 | 公开问题 | https://github.com/keman5/authenticator-for-2fa/issues |
 | 隐私政策 | [英文](../../PRIVACY.md)、[简体中文](../../PRIVACY.zh-CN.md) |
 | 支持页 | [SUPPORT.md](../../SUPPORT.md) |
-| 商品文案 | [英文](listing.en.md)、[简体中文](listing.zh-CN.md) |
+| 商品文案 | [英文](listing.en.md)、[简体中文](listing.zh-CN.md)、[繁體中文](listing.zh-TW.md) |
 | 单一用途／权限解释 | [permissions.md](permissions.md) |
 | 隐私表单填写依据 | [privacy-disclosures.md](privacy-disclosures.md) |
 | 审核测试与源码重现 | [reviewer-notes.md](reviewer-notes.md) |
 | 图标与截图 | [assets.md](assets.md) |
 | 代码许可证 | [MIT](../../LICENSE)，依赖许可随发布包提供 |
+
+商店介绍覆盖扩展支持的 14 种语言：简体中文、繁体中文使用对应中文，其他语言统一使用英文；截图全部使用英文。Firefox AMO 当前菜单不提供阿拉伯语、孟加拉语、印地语的资料入口，使用默认英文介绍。最新提交范围及审核状态见 [1.0.1 提交记录](submission-1.0.1.md)，历史记录见 [1.0](submission-1.0.md)。
 
 网页托管前，可在公开仓库发布后使用以下候选地址；**提交前必须在未登录浏览器中验证能访问，当前本地文件并不代表这些 URL 已上线**：
 

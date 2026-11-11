@@ -19,7 +19,7 @@
 | 远程代码 | No；JS 和 QR WebAssembly 随包提供 |
 | 数据使用表 | 按 [privacy-disclosures.md](privacy-disclosures.md) 填写；账户认证信息、标签和本地网页处理都需如实披露 |
 | 商标图 | `logo-300.png`；为启用的商品页语言复制相同图标 |
-| 截图 | `screenshots/en/`、`screenshots/zh-CN/`，各三张 1280×800 |
+| 截图 | `screenshots/en/` 三张 1280×800 英文截图；中文商品页也使用英文截图 |
 | Certification notes | [reviewer-notes.md](reviewer-notes.md)，无需开发者账户；Touch ID 需另装辅助程序 |
 
 本次未制作可选宣传图／视频。不要把整份材料 ZIP 作为扩展包。包的浏览器平台名称、权限及本地 API 必须与上传版本一致。Edge 商店 ID 由商店分配，不使用 Firefox 邮箱形式的 ID；取得最终 Edge ID 后，再将其加入本机 Touch ID 辅助程序白名单。

@@ -282,7 +282,7 @@ test.each(["delete confirmation", "drag preview"] as const)(
       const handle = screen.getByRole("button", {
         name: "Drag to reorder: PrivateService",
       });
-      handle.setPointerCapture = vi.fn();
+      document.querySelector('.account-list')!.setPointerCapture = vi.fn();
       fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
       expect(document.querySelector(".account-row.dragging")).not.toBeNull();
     }

@@ -17,7 +17,7 @@
 | 支持 URL | https://github.com/keman5/authenticator-for-2fa/blob/main/SUPPORT.md |
 | 隐私 | [英文政策](../../PRIVACY.md)；可复制全文到 AMO 隐私字段；需要 URL 时使用已发布政策地址 |
 | 图标 | `icon-128.png` |
-| 截图候选 | `screenshots/en/` 和 `screenshots/zh-CN/` 中三张 1280×800 图片 |
+| 截图候选 | `screenshots/en/` 中三张 1280×800 英文图片；中文商品页使用同一套英文截图 |
 | 审核备注 | [reviewer-notes.md](reviewer-notes.md)，包含虚构账户、基本测试和可选功能依赖 |
 | 许可 | MIT，依赖许可包含在扩展包中 |
 

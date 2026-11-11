@@ -2,7 +2,7 @@
 
 运行根目录 `./build.sh store`，使用现有品牌 SVG 生成 PNG 图标，并在后台 Edge 临时配置中截取真实扩展页面。账户和密钥均为虚构演示数据，不读取日常浏览器或个人账户。输出为 `artifacts/store/`，同步复制到 `~/Downloads/dist/store/`。
 
-`firefox/` 与 `edge/` 是各商店材料目录，包含独立命名的 `extension.zip`、中英文字段 JSON、图标、六张候选截图和 `SHA256SUMS`。Firefox 另含 `source.zip`。每个目录的 `submission.json` 标出准确版本、manifest locale、截图来源和未完成事项；`readyToSubmit: false` 表示仍需关闭提交门槛，不能把材料生成成功等同于可发布。
+`firefox/` 与 `edge/` 是各商店材料目录，包含独立命名的 `extension.zip`、中英文字段 JSON、图标、三张英文截图（中英文商品页共用）和 `SHA256SUMS`。Firefox 另含 `source.zip`。每个目录的 `submission.json` 标出准确版本、manifest locale、截图来源和未完成事项；`readyToSubmit: false` 表示仍需关闭提交门槛，不能把材料生成成功等同于可发布。
 
 | 文件 | 规格／用途 |
 | --- | --- |
@@ -10,10 +10,10 @@
 | `icon-300.png` | Edge 商标图 |
 | `icon-512.png` | 高分辨率品牌素材 |
 | `icon-1024.png` | Safari 容器图标源素材；仍需集成 Xcode AppIcon 并核对不透明背景等规范 |
-| `en/accounts-1280x800.png`、`zh-CN/accounts-1280x800.png` | 实际账户列表，Chrome／Edge 商品截图 |
-| `en/data-1280x800.png`、`zh-CN/data-1280x800.png` | 实际导入／导出页，Chrome／Edge 商品截图 |
-| `en/settings-1280x800.png`、`zh-CN/settings-1280x800.png` | 实际设置页，Chrome／Edge 商品截图 |
-| `en/accounts-612x408.png`、`zh-CN/accounts-612x408.png` | Opera 尺寸候选，仍需在 Opera 中复拍并验证功能 |
+| `en/accounts-1280x800.png` | 实际账户列表，Chrome／Edge 商品截图 |
+| `en/data-1280x800.png` | 实际导入／导出页，Chrome／Edge 商品截图 |
+| `en/settings-1280x800.png` | 实际设置页，Chrome／Edge 商品截图 |
+| `en/accounts-612x408.png` | Opera 尺寸候选，仍需在 Opera 中复拍并验证功能 |
 | `material-version.json` | 截图对应的版本、演示数据说明与尺寸信息 |
 
 1280×800 图片将实际 370×720 扩展画面等比例放在中性背景上，不添加安全性宣称或模拟控件。612×408 候选保留原比例缩小，不裁切隐藏控件。截图中的时间码来自公开演示密钥，不可用于真实服务。

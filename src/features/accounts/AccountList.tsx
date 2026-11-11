@@ -67,11 +67,15 @@ export function AccountList({
   const drag = useRef<{
     id: string;
     ids: string[];
+    order: string[];
     pointerId: number;
     target: number;
     source: number;
   } | null>(null);
-  const sortedAccounts = useMemo(() => vault.sortedAccounts, [vault, vault.accounts]);
+  const sortedAccounts = useMemo(
+    () => vault.sortedAccounts,
+    [vault, vault.accounts]
+  );
   const ranked = useMemo(
     () => getAccountPageRanking(sortedAccounts, context),
     [sortedAccounts, context]
@@ -86,29 +90,39 @@ export function AccountList({
     let active = true;
     void request<unknown>('site-icon', { hostname, source })
       .then((icon) => {
-        if (active && isSiteIcon(icon)) setSiteIcons(rememberSiteIcon(hostname, icon));
+        if (active && isSiteIcon(icon))
+          setSiteIcons(rememberSiteIcon(hostname, icon));
       })
       .catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [hostname, context?.faviconReady, shouldReadIcon, source]);
   const accountIcons = useMemo(() => {
     const current = siteIcons.find(([host]) => host === hostname);
-    return new Map(sortedAccounts.map((account) => {
-      const icon = (ranked.suggestedAccountIds.has(account.id) ? current : undefined)
-        ?? siteIcons.find(([host]) => getAccountPageMatchScore(account, { hostname: host }) > 0);
-      return [account.id, icon?.[1]];
-    }));
+    return new Map(
+      sortedAccounts.map((account) => {
+        const icon =
+          (ranked.suggestedAccountIds.has(account.id) ? current : undefined) ??
+          siteIcons.find(
+            ([host]) =>
+              getAccountPageMatchScore(account, { hostname: host }) > 0
+          );
+        return [account.id, icon?.[1]];
+      })
+    );
   }, [sortedAccounts, ranked, hostname, siteIcons]);
-  const ordered =
-    vault.settings.accountSortMode === 'contextual'
-      ? ranked.accounts
-      : sortedAccounts;
   const favoriteOrder = useMemo(
     () =>
-      [...ordered].sort(
-        (a, b) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite))
+      [...sortedAccounts].sort(
+        (a, b) =>
+          Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) ||
+          (vault.settings.accountSortMode === 'contextual'
+            ? Number(ranked.suggestedAccountIds.has(b.id)) -
+              Number(ranked.suggestedAccountIds.has(a.id))
+            : 0)
       ),
-    [ordered]
+    [sortedAccounts, ranked, vault.settings.accountSortMode]
   );
   const visibleByDefault = new Set([
     ...revealedAccountIds,
@@ -122,18 +136,21 @@ export function AccountList({
     alwaysShowAll: vault.settings.alwaysShowAllCodes || filter !== 'all',
     revealAll: expanded
   });
-  let accounts = preview ?? [...view.accounts, ...view.revealedAccounts];
+  let visibleAccounts = [...view.accounts, ...view.revealedAccounts];
   if (filter === 'site')
-    accounts = accounts.filter((account) =>
+    visibleAccounts = visibleAccounts.filter((account) =>
       ranked.suggestedAccountIds.has(account.id)
     );
   if (filter === 'fav')
-    accounts = accounts.filter((account) => account.favorite);
-  const canReorder =
-    vault.settings.accountSortMode === 'manual' &&
-    !query.trim() &&
-    filter === 'all' &&
-    accounts.length === vault.accounts.length;
+    visibleAccounts = visibleAccounts.filter((account) => account.favorite);
+  const accounts = preview ?? visibleAccounts;
+  const canReorder = !query.trim() && filter === 'all';
+  const groupFor = (item: AuthenticatorAccount) =>
+    item.favorite
+      ? 'fav'
+      : ranked.suggestedAccountIds.has(item.id)
+        ? 'site'
+        : 'other';
   useEffect(() => {
     setExpanded(false);
   }, [context?.hostname]);
@@ -169,12 +186,14 @@ export function AccountList({
   ) {
     if (!canReorder || event.button !== 0) return;
     event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Capture on the stable list: moving a row can release its pointer capture.
+    list.current!.setPointerCapture(event.pointerId);
     const ids = accounts.map((a) => a.id),
       source = ids.indexOf(account.id);
     drag.current = {
       id: account.id,
       ids,
+      order: sortedAccounts.map((a) => a.id),
       pointerId: event.pointerId,
       target: source,
       source
@@ -182,20 +201,46 @@ export function AccountList({
     setDragId(account.id);
     setPreview(accounts);
   }
-  function move(event: PointerEvent<HTMLButtonElement>) {
+  function isCurrent(current: NonNullable<typeof drag.current>) {
+    return (
+      canReorder &&
+      isReorderCurrent(visibleAccounts, current.ids) &&
+      isReorderCurrent(sortedAccounts, current.order)
+    );
+  }
+  function reorder(source: number, target: number) {
+    const ids = moveItem(
+      visibleAccounts.map((a) => a.id),
+      source,
+      target
+    );
+    const visible = new Set(ids);
+    let index = 0;
+    return vault.reorderAccounts(
+      sortedAccounts.map((a) => (visible.has(a.id) ? ids[index++] : a.id))
+    );
+  }
+  function move(event: PointerEvent<HTMLUListElement>) {
     const current = drag.current;
     if (!current || current.pointerId !== event.pointerId) return;
-    if (!isReorderCurrent(favoriteOrder, current.ids)) {
+    if (!isCurrent(current)) {
       finish(true);
       return;
     }
     const cards = Array.from(
       list.current?.querySelectorAll<HTMLElement>('[data-account-id]') ?? []
     );
-    const hit = cards.findIndex(
-      (card) => event.clientY < card.getBoundingClientRect().bottom
+    const targets = cards
+      .map((card, index) => ({ card, index }))
+      .filter(
+        ({ index }) =>
+          groupFor(visibleAccounts[index]) ===
+          groupFor(visibleAccounts[current.source])
+      );
+    const hit = targets.find(
+      ({ card }) => event.clientY < card.getBoundingClientRect().bottom
     );
-    current.target = hit < 0 ? cards.length - 1 : hit;
+    current.target = (hit ?? targets[targets.length - 1]).index;
     const next = current.ids
       .map((id) => vault.accounts.find((a) => a.id === id)!)
       .filter(Boolean);
@@ -212,10 +257,14 @@ export function AccountList({
     drag.current = null;
     setPreview(null);
     setDragId(null);
-    if (!current || cancel || !canReorder) return;
-    if (!isReorderCurrent(favoriteOrder, current.ids)) return;
-    const ids = moveItem(current.ids, current.source, current.target);
-    run(() => vault.reorderAccounts(ids));
+    if (
+      !current ||
+      cancel ||
+      !isCurrent(current) ||
+      current.source === current.target
+    )
+      return;
+    run(() => reorder(current.source, current.target));
   }
   async function keyboardMove(
     account: AuthenticatorAccount,
@@ -225,11 +274,8 @@ export function AccountList({
       index = ids.indexOf(account.id),
       target = index + direction;
     if (target < 0 || target >= ids.length) return;
-    if (
-      Boolean(accounts[index].favorite) !== Boolean(accounts[target].favorite)
-    )
-      return;
-    await vault.reorderAccounts(moveItem(ids, index, target));
+    if (groupFor(accounts[index]) !== groupFor(accounts[target])) return;
+    await reorder(index, target);
   }
   return (
     <>
@@ -261,6 +307,12 @@ export function AccountList({
         role="list"
         ref={list}
         hidden={!accounts.length}
+        onPointerMove={move}
+        onPointerUp={(event) => {
+          if (drag.current?.pointerId === event.pointerId) finish();
+        }}
+        onPointerCancel={() => finish(true)}
+        onLostPointerCapture={() => finish(true)}
       >
         {accounts.map((account, index) => {
           const code = vault.codes[account.id];
@@ -270,12 +322,6 @@ export function AccountList({
             hovered !== account.id &&
             focused !== account.id;
           const expiring = account.type !== 'hotp' && code?.remaining <= 5;
-          const groupFor = (item: AuthenticatorAccount) =>
-            item.favorite
-              ? 'fav'
-              : ranked.suggestedAccountIds.has(item.id)
-                ? 'site'
-                : 'other';
           const group = groupFor(account);
           const showGroup =
             index === 0 || groupFor(accounts[index - 1]) !== group;
@@ -316,9 +362,6 @@ export function AccountList({
                   aria-label={`${tr('reorderAccount')}: ${account.issuer || account.label}`}
                   disabled={!canReorder}
                   onPointerDown={(event) => start(event, account)}
-                  onPointerMove={move}
-                  onPointerUp={() => finish()}
-                  onPointerCancel={() => finish(true)}
                   onKeyDown={(event) => {
                     if (
                       canReorder &&
@@ -332,8 +375,15 @@ export function AccountList({
                   }}
                 >
                   {icon ? (
-                    <img className="size-5 pointer-events-none" src={icon} alt="" draggable={false} />
-                  ) : (account.issuer || account.label).slice(0, 1).toUpperCase()}
+                    <img
+                      className="size-5 pointer-events-none"
+                      src={icon}
+                      alt=""
+                      draggable={false}
+                    />
+                  ) : (
+                    (account.issuer || account.label).slice(0, 1).toUpperCase()
+                  )}
                 </button>
                 <button
                   className="card-main"

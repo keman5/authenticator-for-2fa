@@ -13,6 +13,7 @@ import { tmpdir, homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { createHash } from "node:crypto";
 import sharp from "sharp";
+import assert from "node:assert/strict";
 
 // Capture only public dummy credentials in a disposable, headless local browser.
 const output = "artifacts/store";
@@ -23,6 +24,9 @@ const { version: packageVersion, extensionVersion } = JSON.parse(
 );
 const version = extensionVersion ?? packageVersion;
 const manifest = JSON.parse(await readFile("dist/edge/manifest.json", "utf8"));
+const listingLocales = (await readdir("dist/edge/_locales")).map((locale) =>
+  locale.replace("_", "-"),
+);
 if (manifest.version !== version)
   throw new Error("Build the current version first.");
 for (const size of [128, 300, 512, 1024])
@@ -146,7 +150,7 @@ try {
     "extension worker context",
   );
   const root = target.url.slice(0, target.url.indexOf("/assets/"));
-  for (const locale of ["en", "zh-CN"]) {
+  for (const locale of ["en"]) {
     const records = Object.fromEntries(
       ["Example Mail", "Demo Workspace", "Sample Cloud"].map(
         (provider, index) => {
@@ -177,7 +181,7 @@ try {
       schema: 2,
       records,
       preferences: {
-        locale: locale === "zh-CN" ? "zh" : locale,
+        locale,
         languageMode: "manual",
         theme: "light",
         conceal: false,
@@ -213,6 +217,66 @@ try {
           "document.querySelectorAll('.code').length === 3 && document.querySelectorAll('.p-nav button').length === 3",
         ),
       "demo accounts",
+    );
+    // Exercise real pointer capture and persistence in the packaged extension.
+    await worker.evaluate(
+      `chrome.storage.local.set(${JSON.stringify({ "keman5.authenticator.workspace.v2": { ...workspace, preferences: { ...workspace.preferences, sortMode: "contextual" } } })})`,
+    );
+    const dragPoints = await page.evaluate(
+      `Array.from(document.querySelectorAll('.drag-handle')).map(el=>{const r=el.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,disabled:el.disabled}})`,
+    );
+    assert.equal(dragPoints.length, 3);
+    assert.equal(dragPoints[1].disabled, false);
+    await page.call("Input.dispatchMouseEvent", {
+      type: "mousePressed",
+      button: "left",
+      buttons: 1,
+      clickCount: 1,
+      ...dragPoints[1],
+    });
+    for (let step = 1; step <= 10; step++)
+      await page.call("Input.dispatchMouseEvent", {
+        type: "mouseMoved",
+        button: "left",
+        buttons: 1,
+        x: dragPoints[1].x,
+        y: dragPoints[1].y + ((dragPoints[2].y - dragPoints[1].y) * step) / 10,
+      });
+    await page.call("Input.dispatchMouseEvent", {
+      type: "mouseReleased",
+      button: "left",
+      buttons: 0,
+      clickCount: 1,
+      x: 369,
+      y: 719,
+    });
+    await until(
+      () =>
+        worker.evaluate(
+          `chrome.storage.local.get('keman5.authenticator.workspace.v2').then(x=>x['keman5.authenticator.workspace.v2'].records['${"2".repeat(64)}'].position===2)`,
+        ),
+      "pointer reorder persisted",
+    );
+    await page.call("Page.reload");
+    await until(
+      () =>
+        page.evaluate(
+          `Array.from(document.querySelectorAll('[data-account-id]')).map(el=>el.dataset.accountId).join(',')==='${["1", "3", "2"].map((x) => x.repeat(64)).join(",")}'`,
+        ),
+      "reorder after reopening",
+    );
+    await worker.evaluate(
+      `chrome.storage.local.set(${JSON.stringify({ "keman5.authenticator.workspace.v2": workspace })})`,
+    );
+    await until(
+      () =>
+        page.evaluate(
+          `Array.from(document.querySelectorAll('[data-account-id]')).map(el=>el.dataset.accountId).join(',')==='${["1", "2", "3"].map((x) => x.repeat(64)).join(",")}'`,
+        ),
+      "restore screenshot accounts",
+    );
+    console.log(
+      "PASS headless Edge: real mouse drag, release outside list, persisted order after reload.",
     );
     await page.evaluate("document.fonts.ready.then(()=>true)");
     await mkdir(`${output}/${locale}`, { recursive: true });
@@ -303,10 +367,8 @@ try {
     }
     await cp(`${output}/icon-128.png`, join(folder, "icon-128.png"));
     await cp(`${output}/icon-300.png`, join(folder, "logo-300.png"));
-    for (const [locale, copyFile] of [
-      ["en", "listing.en.md"],
-      ["zh-CN", "listing.zh-CN.md"],
-    ]) {
+    for (const locale of listingLocales) {
+      const copyFile = `listing.${locale === "zh-CN" || locale === "zh-TW" ? locale : "en"}.md`;
       const copy = await readFile(`docs/store/${copyFile}`, "utf8");
       const sections = copy
         .split(/^## /m)
@@ -347,13 +409,13 @@ try {
       await mkdir(join(folder, "screenshots", locale), { recursive: true });
       for (const screen of ["accounts", "data", "settings"])
         await cp(
-          `${output}/${locale}/${screen}-1280x800.png`,
+          `${output}/en/${screen}-1280x800.png`,
           join(folder, "screenshots", locale, `${screen}.png`),
         );
     }
     await writeFile(
       join(folder, "README.md"),
-      `# ${target === "firefox" ? "Firefox AMO" : "Microsoft Edge Add-ons"}\n\nVersion: ${version}\n\nUpload extension.zip only as the extension package.${target === "firefox" ? " Upload source.zip separately for source review." : ""}\n\nSee [submission checklist](../docs/store/${target}.md), [reviewer notes](../docs/store/reviewer-notes.md), [privacy](../PRIVACY.md) and [permission explanations](../docs/store/permissions.md).\n\nListings: listing.en.json and listing.zh-CN.json. Contact: support@macseek.cc.\n\nScreenshots were captured from the actual extension in headless Edge with synthetic accounts.${target === "firefox" ? " Firefox runtime verification and any necessary recapture remain required." : ""}\n\nStatus: preparation only; not submitted. Resolve the checklist's data-consent, privacy/security and publication items before submission.\n`,
+      `# ${target === "firefox" ? "Firefox AMO" : "Microsoft Edge Add-ons"}\n\nVersion: ${version}\n\nUpload extension.zip only as the extension package.${target === "firefox" ? " Upload source.zip separately for source review." : ""}\n\nSee [submission checklist](../docs/store/${target}.md), [reviewer notes](../docs/store/reviewer-notes.md), [privacy](../PRIVACY.md) and [permission explanations](../docs/store/permissions.md).\n\nListings: ${listingLocales.length} language JSON files. Chinese locales use Chinese; all others use English. Contact: support@macseek.cc.\n\nAll screenshots are English, captured from the actual extension in headless Edge with synthetic accounts.${target === "firefox" ? " Firefox runtime verification remains required. AMO has no ar, bn or hi listing fields; use default English for these locales." : ""}\n\nStatus: preparation only; not submitted. See submission.json and the submission record after uploading.\n`,
     );
     await writeFile(
       join(folder, "submission.json"),
@@ -366,7 +428,13 @@ try {
           package: "extension.zip",
           source: target === "firefox" ? "source.zip" : null,
           manifestLocales: await readdir(`dist/${target}/_locales`),
-          preparedListingLocales: ["en", "zh-CN"],
+          preparedListingLocales: listingLocales,
+          listingLanguageRule: {
+            "zh-CN": "Simplified Chinese",
+            "zh-TW": "Traditional Chinese",
+            other: "English",
+          },
+          screenshotLocales: ["en"],
           screenshotBrowser: "Edge",
           submitted: false,
           readyToSubmit: false,
@@ -409,7 +477,8 @@ try {
         version,
         browser: "Headless Chromium-compatible browser (Edge by default)",
         syntheticAccountsOnly: true,
-        locales: ["en", "zh-CN"],
+        locales: listingLocales,
+        screenshotLocales: ["en"],
         screenshots: { width: 1280, height: 800 },
         operaReference: { width: 612, height: 408 },
       },

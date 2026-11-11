@@ -1,7 +1,7 @@
 {
   "name": "authenticator-for-2fa",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "packageManager": "pnpm@12.11.2",
   "scripts": {
@@ -44,5 +44,5 @@
     "jsdom": "^30.1.3",
     "prettier": "^3.9.10"
   },
-  "extensionVersion": "1.0"
+  "extensionVersion": "1.0.1"
 }

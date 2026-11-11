@@ -12,7 +12,10 @@ import { AccountList } from '../../src/features/accounts/AccountList';
 import { VaultProvider } from '../../src/app/vault';
 import { AuthenticatorVault } from '../../src/platform/controller';
 import { installStructuredCloneChromeStorage } from '../helpers/storage';
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 test('folded All keeps favorites visible alongside site matches and reveals the remaining accounts on demand', async () => {
   installStructuredCloneChromeStorage();
   const vault = new AuthenticatorVault();
@@ -64,23 +67,44 @@ test('folded All keeps favorites visible alongside site matches and reveals the 
 });
 test('a matched site icon is reused when reopened away from the site and cleared by reset', async () => {
   installStructuredCloneChromeStorage();
-  const icon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aRwAAAABJRU5ErkJggg==';
-  const sendMessage = vi.fn((_request, reply) => reply({ ok: true, value: icon }));
+  const icon =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aRwAAAABJRU5ErkJggg==';
+  const sendMessage = vi.fn((_request, reply) =>
+    reply({ ok: true, value: icon })
+  );
   Object.assign(chrome.runtime, { sendMessage });
   const vault = new AuthenticatorVault();
   await vault.initialize();
-  await vault.addAccount({ issuer: 'Example', label: 'user', site: 'example.com', secret: 'JBSWY3DPEHPK3PXP' });
-  const show = (hostname?: string) => render(
-    <VaultProvider vault={vault}>
-      <AccountList query="" context={hostname ? { hostname } : null} onEdit={() => {}} onQr={() => {}} onCopy={() => {}} />
-    </VaultProvider>
-  );
+  await vault.addAccount({
+    issuer: 'Example',
+    label: 'user',
+    site: 'example.com',
+    secret: 'JBSWY3DPEHPK3PXP'
+  });
+  const show = (hostname?: string) =>
+    render(
+      <VaultProvider vault={vault}>
+        <AccountList
+          query=""
+          context={hostname ? { hostname } : null}
+          onEdit={() => {}}
+          onQr={() => {}}
+          onCopy={() => {}}
+        />
+      </VaultProvider>
+    );
   try {
     const initial = show('example.com');
-    await waitFor(() => expect(initial.container.querySelector('.avatar img')?.getAttribute('src')).toBe(icon));
+    await waitFor(() =>
+      expect(
+        initial.container.querySelector('.avatar img')?.getAttribute('src')
+      ).toBe(icon)
+    );
     initial.unmount();
     const reopened = show();
-    expect(reopened.container.querySelector('.avatar img')?.getAttribute('src')).toBe(icon);
+    expect(
+      reopened.container.querySelector('.avatar img')?.getAttribute('src')
+    ).toBe(icon);
     expect(sendMessage).toHaveBeenCalledTimes(1);
     reopened.unmount();
     await vault.resetVault();
@@ -286,10 +310,24 @@ test('Favorites precedes Current site and only the hovered or keyboard-focused a
   installStructuredCloneChromeStorage();
   const vault = new AuthenticatorVault();
   await vault.initialize();
-  await vault.importText('otpauth://totp/Example:one?secret=JBSWY3DPEHPK3PXP\notpauth://totp/Example:two?secret=KRSXG5DSMFWHK3DM');
+  await vault.importText(
+    'otpauth://totp/Example:one?secret=JBSWY3DPEHPK3PXP\notpauth://totp/Example:two?secret=KRSXG5DSMFWHK3DM'
+  );
   await vault.updateSettings({ hideCodes: true, alwaysShowAllCodes: true });
-  const { container } = render(<VaultProvider vault={vault}><AccountList query="" context={{ hostname: 'example.com' }} onEdit={() => {}} onQr={() => {}} onCopy={() => {}} /></VaultProvider>);
-  const chips = Array.from(container.querySelectorAll('.chip')).map((element) => element.textContent);
+  const { container } = render(
+    <VaultProvider vault={vault}>
+      <AccountList
+        query=""
+        context={{ hostname: 'example.com' }}
+        onEdit={() => {}}
+        onQr={() => {}}
+        onCopy={() => {}}
+      />
+    </VaultProvider>
+  );
+  const chips = Array.from(container.querySelectorAll('.chip')).map(
+    (element) => element.textContent
+  );
   expect(chips[1]).toBe('Favorites');
   expect(chips[2]).toContain('Current site');
   const cards = container.querySelectorAll('.account-row');
@@ -301,7 +339,9 @@ test('Favorites precedes Current site and only the hovered or keyboard-focused a
   expect(container.querySelectorAll('.hidden-code')).toHaveLength(2);
   fireEvent.focus(cards[1].querySelector('.card-main')!);
   expect(cards[1].querySelector('.hidden-code')).toBeNull();
-  fireEvent.blur(cards[1].querySelector('.card-main')!, { relatedTarget: document.body });
+  fireEvent.blur(cards[1].querySelector('.card-main')!, {
+    relatedTarget: document.body
+  });
   expect(container.querySelectorAll('.hidden-code')).toHaveLength(2);
 });
 
@@ -328,7 +368,7 @@ test('a drag cannot overwrite account order refreshed by another panel', async (
   const handle = screen.getAllByRole('button', {
     name: 'Drag to reorder: Example'
   })[0];
-  handle.setPointerCapture = vi.fn();
+  document.querySelector('ul')!.setPointerCapture = vi.fn();
   fireEvent.pointerDown(handle, { button: 0, pointerId: 1 });
   expect(document.querySelector('.account-row.dragging')).not.toBeNull();
   const remoteOrder = [...vault.sortedAccounts]
@@ -343,3 +383,76 @@ test('a drag cannot overwrite account order refreshed by another panel', async (
   );
   expect(document.querySelector('.account-row.dragging')).toBeNull();
 });
+
+test.each(['default', 'folded', 'expanded manual'])(
+  'pointer ordering persists in the %s view without changing hidden accounts',
+  async (mode) => {
+    installStructuredCloneChromeStorage();
+    vi.stubGlobal('PointerEvent', MouseEvent);
+    const vault = new AuthenticatorVault();
+    await vault.initialize();
+    for (const issuer of ['Other', 'Example', 'Example'])
+      await vault.addAccount({
+        issuer,
+        label: String(vault.accounts.length),
+        secret: 'JBSWY3DPEHPK3PXP'
+      });
+    if (mode === 'expanded manual')
+      await vault.updateSettings({ accountSortMode: 'manual' });
+    const { container } = render(
+      <VaultProvider vault={vault}>
+        <AccountList
+          query=""
+          context={mode === 'default' ? null : { hostname: 'example.com' }}
+          onEdit={() => {}}
+          onQr={() => {}}
+          onCopy={() => {}}
+        />
+      </VaultProvider>
+    );
+    if (mode === 'expanded manual')
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Show all accounts (1)' })
+      );
+    const list = container.querySelector('ul')!;
+    const capture = vi.fn();
+    list.setPointerCapture = capture;
+    const handles = screen.getAllByRole('button', {
+      name: 'Drag to reorder: Example'
+    });
+    for (const card of list.querySelectorAll<HTMLElement>('[data-account-id]'))
+      vi.spyOn(card, 'getBoundingClientRect').mockImplementation(() => {
+        const index = [...list.querySelectorAll('[data-account-id]')].indexOf(
+          card
+        );
+        return { top: index * 60, bottom: (index + 1) * 60 } as DOMRect;
+      });
+    const before = vault.sortedAccounts.map((a) => a.id);
+    fireEvent.pointerDown(handles[0], { button: 0, pointerId: 1 });
+    expect(capture).toHaveBeenCalled();
+    fireEvent.pointerMove(list, {
+      pointerId: 1,
+      clientY: mode === 'default' ? 179 : 119
+    });
+    expect(
+      list
+        .querySelectorAll('[data-account-id]')
+        [mode === 'default' ? 2 : 1].querySelector('.drag-handle')
+    ).toBe(handles[0]);
+    fireEvent.pointerUp(list, { pointerId: 1 });
+    const expected =
+      mode === 'expanded manual'
+        ? [before[2], before[1], before[0]]
+        : [before[0], before[2], before[1]];
+    await waitFor(() =>
+      expect(vault.sortedAccounts.map((a) => a.id)).toEqual(expected)
+    );
+    const reopened = new AuthenticatorVault();
+    await reopened.initialize();
+    expect(reopened.sortedAccounts.map((a) => a.id)).toEqual(expected);
+    expect(reopened.settings.accountSortMode).toBe(
+      mode === 'expanded manual' ? 'manual' : 'contextual'
+    );
+    expect(container.querySelector('.dragging')).toBeNull();
+  }
+);
